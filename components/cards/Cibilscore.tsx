@@ -67,11 +67,11 @@ function colorAt(p: number) {
 
 /* ── range band labels ────────────────────────────────────── */
 const BANDS = [
-  { label: "Poor", from: 300, to: 579 },
-  { label: "Fair", from: 580, to: 669 },
-  { label: "Good", from: 670, to: 739 },
-  { label: "V.Good", from: 740, to: 799 },
-  { label: "Excellent", from: 800, to: 900 },
+  { label: "Poor", from: 0, to: 400 },
+  { label: "Fair", from: 401, to: 700 },
+  { label: "Better", from: 701, to: 750 },
+  { label: "Excellent", from: 751, to: 890 },
+  { label: "Elite", from: 891, to: 950 },
 ];
 
 /* ═══════════════════════════════════════════════════════════ */

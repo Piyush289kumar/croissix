@@ -141,7 +141,7 @@ export const MobileNavbar = () => {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
 
             {/* Search */}
-            <button
+            {/* <button
               aria-label="Search"
               style={{
                 width: 36, height: 36,
@@ -159,7 +159,7 @@ export const MobileNavbar = () => {
               onPointerLeave={e => (e.currentTarget.style.transform = "scale(1)")}
             >
               <SearchIcon />
-            </button>
+            </button> */}
 
             {/* AI */}
             <button
@@ -190,7 +190,7 @@ export const MobileNavbar = () => {
               onPointerLeave={e => (e.currentTarget.style.transform = "scale(1)")}
             >
               <AISparkle />
-              <span>AI</span>
+              <span>Ask AI</span>
             </button>
 
           </div>
