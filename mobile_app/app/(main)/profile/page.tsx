@@ -5,6 +5,7 @@ import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { RefreshCcw } from "lucide-react";
 
 /*
   Dark palette anchored to rgb(13, 20, 33):
@@ -430,7 +431,6 @@ const GoogleG = () => (
     />
   </svg>
 );
-
 const ChevronDown = () => (
   <svg width="12" height="7" viewBox="0 0 12 7" fill="none">
     <path
@@ -439,16 +439,6 @@ const ChevronDown = () => (
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
-    />
-  </svg>
-);
-const PlusIcon = () => (
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M12 5v14M5 12h14"
-      stroke="currentColor"
-      strokeWidth="2.4"
-      strokeLinecap="round"
     />
   </svg>
 );
@@ -480,342 +470,6 @@ const ExternalLinkIcon = () => (
   </svg>
 );
 
-interface GmbLink {
-  id: string;
-  label: string;
-  desc: string;
-  url: string;
-  color: string;
-  icon: () => React.ReactNode;
-}
-
-const GMB_LINKS: GmbLink[] = [
-  {
-    id: "dashboard",
-    label: "Business Dashboard",
-    desc: "Manage your Google listing",
-    url: "https://business.google.com",
-    color: "#4285F4",
-    icon: () => (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <rect
-          x="3"
-          y="3"
-          width="7"
-          height="7"
-          rx="1.5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <rect
-          x="14"
-          y="3"
-          width="7"
-          height="7"
-          rx="1.5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <rect
-          x="3"
-          y="14"
-          width="7"
-          height="7"
-          rx="1.5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <rect
-          x="14"
-          y="14"
-          width="7"
-          height="7"
-          rx="1.5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: "reviews",
-    label: "Customer Reviews",
-    desc: "Reply to reviews & ratings",
-    url: "https://business.google.com/reviews",
-    color: "#FBBC05",
-    icon: () => (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <polygon
-          points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: "photos",
-    label: "Photos & Media",
-    desc: "Upload business photos",
-    url: "https://business.google.com/photos",
-    color: "#34A853",
-    icon: () => (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <rect
-          x="3"
-          y="3"
-          width="18"
-          height="18"
-          rx="2"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <circle
-          cx="8.5"
-          cy="8.5"
-          r="1.5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <polyline
-          points="21 15 16 10 5 21"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: "insights",
-    label: "Insights & Analytics",
-    desc: "Views, clicks & searches",
-    url: "https://business.google.com/insights",
-    color: "#EA4335",
-    icon: () => (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <line
-          x1="18"
-          y1="20"
-          x2="18"
-          y2="10"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-        <line
-          x1="12"
-          y1="20"
-          x2="12"
-          y2="4"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-        <line
-          x1="6"
-          y1="20"
-          x2="6"
-          y2="14"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: "posts",
-    label: "Google Posts",
-    desc: "Create updates & offers",
-    url: "https://business.google.com/posts",
-    color: "#8b5cf6",
-    icon: () => (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <polyline
-          points="14 2 14 8 20 8"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <line
-          x1="16"
-          y1="13"
-          x2="8"
-          y2="13"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-        <line
-          x1="16"
-          y1="17"
-          x2="8"
-          y2="17"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: "info",
-    label: "Business Info",
-    desc: "Hours, address & contact",
-    url: "https://business.google.com/edit",
-    color: "#06b6d4",
-    icon: () => (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
-        <line
-          x1="12"
-          y1="8"
-          x2="12"
-          y2="12"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-        <line
-          x1="12"
-          y1="16"
-          x2="12.01"
-          y2="16"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-];
-
-function GmbLinkRow({
-  link,
-  t,
-  delay,
-}: {
-  link: GmbLink;
-  t: ReturnType<typeof getTheme>;
-  delay: number;
-}) {
-  const [pressed, setPressed] = useState(false);
-  return (
-    <Link
-      href={link.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      onPointerDown={() => setPressed(true)}
-      onPointerUp={() => setPressed(false)}
-      onPointerLeave={() => setPressed(false)}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 11,
-        padding: "10px 16px 10px 16px",
-        background: pressed ? t.pressed : "transparent",
-        textDecoration: "none",
-        cursor: "pointer",
-        transition: "background .1s",
-        WebkitTapHighlightColor: "transparent",
-        animation: "gmbSlideIn 0.2s ease both",
-        animationDelay: `${delay}ms`,
-      }}
-    >
-      <div
-        style={{
-          width: 3,
-          height: 28,
-          borderRadius: 2,
-          background: link.color,
-          flexShrink: 0,
-          marginLeft: 6,
-        }}
-      />
-      <div
-        style={{
-          width: 30,
-          height: 30,
-          borderRadius: 8,
-          flexShrink: 0,
-          background: `${link.color}18`,
-          border: `1px solid ${link.color}28`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: link.color,
-        }}
-      >
-        {link.icon()}
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            fontSize: 13.5,
-            fontWeight: 500,
-            color: t.text,
-            letterSpacing: "-0.01em",
-            fontFamily:
-              "-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {link.label}
-        </div>
-        <div
-          style={{
-            fontSize: 11,
-            color: t.sub,
-            marginTop: 1,
-            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-          }}
-        >
-          {link.desc}
-        </div>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 3,
-          background: `${link.color}12`,
-          border: `1px solid ${link.color}30`,
-          borderRadius: 20,
-          padding: "3px 9px",
-          color: link.color,
-          flexShrink: 0,
-        }}
-      >
-        <PlusIcon />
-        <span
-          style={{
-            fontSize: 11.5,
-            fontWeight: 600,
-            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-          }}
-        >
-          Link
-        </span>
-        <ExternalLinkIcon />
-      </div>
-    </Link>
-  );
-}
-
 function getTheme(isDark: boolean) {
   return isDark ? D : L;
 }
@@ -829,6 +483,55 @@ function GoogleProfileRow({
 }) {
   const [open, setOpen] = useState(false);
   const [pressed, setPressed] = useState(false);
+  const [locations, setLocations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const user = useSelector((state: RootState) => state.user.data);
+
+  const connectGoogle = () => {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      alert("Please login first");
+      return;
+    }
+
+    if (user?.googleId) {
+      alert("Your Google account is already connected.");
+      return;
+    }
+
+    window.location.href = `/api/auth/google?token=${token}`;
+  };
+
+  useEffect(() => {
+    if (!open) return;
+
+    // fetch only once
+    if (locations.length === 0 && user?.googleId) {
+      fetchLocations();
+    }
+  }, [open]);
+
+  const fetchLocations = async () => {
+    if (!user?.googleId) {
+      setLocations([]);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/google/locations");
+      const data = await res.json();
+
+      setLocations(data.locations || []);
+    } catch (err) {
+      console.error("Failed to load locations", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -901,13 +604,29 @@ function GoogleProfileRow({
                 fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
               }}
             >
-              {GMB_LINKS.length} quick links
+              {user?.googleId ? locations?.length : 0} linked profiles
             </div>
           )}
         </div>
+        {user?.googleId && open && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              fetchLocations();
+            }}
+            disabled={loading}
+            className={`flex items-center text-blue-500 transition 
+      ${loading ? "opacity-70 cursor-not-allowed" : "hover:text-blue-600"}`}
+          >
+            <RefreshCcw
+              size={16}
+              className={`${loading ? "animate-spin" : ""}`}
+            />
+          </button>
+        )}
         <span
           style={{
-            color: t.chevClr,
+            color: "gray",
             transform: open ? "rotate(0deg)" : "rotate(-90deg)",
             transition: "transform .22s cubic-bezier(.4,0,.2,1)",
             display: "flex",
@@ -932,18 +651,75 @@ function GoogleProfileRow({
               fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
             }}
           >
-            Quick Access
+            Link Your Google Profile
           </div>
-          {GMB_LINKS.map((link, i) => (
-            <div key={link.id}>
-              <GmbLinkRow link={link} t={t} delay={i * 30} />
-              {i < GMB_LINKS.length - 1 && (
-                <div
-                  style={{ height: 1, marginLeft: 66, background: t.divider }}
-                />
+          {loading && (
+            <div style={{ padding: 16, color: t.sub }}>
+              Loading locations...
+            </div>
+          )}
+
+          {!loading && locations.length === 0 && (
+            <div
+              style={{
+                padding: 20,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 13,
+                  color: t.sub,
+                  textAlign: "center",
+                }}
+              >
+                No Google Business profiles found
+              </div>
+
+              {!user?.googleId && (
+                <button
+                  onClick={connectGoogle}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    background: "#4285F4",
+                    color: "white",
+                    border: "none",
+                    borderRadius: 20,
+                    padding: "6px 14px",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  <GoogleG />
+                  Link Google Profile
+                </button>
               )}
             </div>
-          ))}
+          )}
+
+          {locations.map((loc: any, i: number) => {
+            const locationId = loc.name.split("/")[1];
+
+            const googleLink = `https://business.google.com/location/${locationId}`;
+
+            return (
+              <div key={loc.name}>
+                <LocationRow location={loc} googleLink={googleLink} t={t} />
+
+                {i < locations.length - 1 && (
+                  <div
+                    style={{ height: 1, marginLeft: 66, background: t.divider }}
+                  />
+                )}
+              </div>
+            );
+          })}
           <div
             style={{
               padding: "8px 20px 12px",
@@ -976,6 +752,82 @@ function GoogleProfileRow({
   );
 }
 
+function LocationRow({
+  location,
+  googleLink,
+  t,
+}: {
+  location: any;
+  googleLink: string;
+  t: any;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "10px 16px",
+      }}
+    >
+      <div
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: 8,
+          background: "white",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+        }}
+      >
+        <GoogleG />
+      </div>
+
+      <div style={{ flex: 1 }}>
+        <div
+          style={{
+            fontSize: 13.5,
+            fontWeight: 500,
+            color: t.text,
+          }}
+        >
+          {location.title}
+        </div>
+
+        <div
+          style={{
+            fontSize: 11,
+            color: t.sub,
+          }}
+        >
+          {location.phoneNumbers?.primaryPhone || "No phone"}
+        </div>
+      </div>
+
+      <a
+        href={googleLink}
+        target="_blank"
+        style={{
+          background: "#4285F4",
+          color: "white",
+          borderRadius: 20,
+          padding: "4px 10px",
+          fontSize: 11,
+          fontWeight: 600,
+          textDecoration: "none",
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        Link <ExternalLinkIcon />
+      </a>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════ */
 export default function ProfilePage() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -987,21 +839,21 @@ export default function ProfilePage() {
   const isDark = mounted && resolvedTheme === "dark";
   const t = isDark ? D : L;
 
-  const connectGoogle = () => {
-    const token = localStorage.getItem("accessToken");
+  // const connectGoogle = () => {
+  //   const token = localStorage.getItem("accessToken");
 
-    if (!token) {
-      alert("Please login first");
-      return;
-    }
+  //   if (!token) {
+  //     alert("Please login first");
+  //     return;
+  //   }
 
-    if (user?.googleId) {
-      alert("Your Google account is already connected.");
-      return;
-    }
+  //   if (user?.googleId) {
+  //     alert("Your Google account is already connected.");
+  //     return;
+  //   }
 
-    window.location.href = `/api/auth/google?token=${token}`;
-  };
+  //   window.location.href = `/api/auth/google?token=${token}`;
+  // };
 
   return (
     <div
@@ -1203,22 +1055,6 @@ export default function ProfilePage() {
           <GoogleProfileRow t={t} isDark={isDark} />
 
           <Section t={t}>
-            <Row
-              icon={<GoogleG />}
-              iconBg="#4285F4"
-              label="Google Business"
-              value={user?.googleId ? "Connected" : "Not Connected"}
-              t={t}
-              onClick={!user?.googleId ? connectGoogle : undefined}
-            />
-            <Row
-              icon={<GoogleG />}
-              iconBg="#4285F4"
-              label="Connect Google Business"
-              t={t}
-              onClick={connectGoogle}
-            />
-
             <Row
               icon={Icon.notification}
               iconBg="#f97316"
