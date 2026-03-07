@@ -6,6 +6,7 @@ import User from "../models/user.model.js";
 
 export const register = async (req, res) => {
   try {
+    console.log("📥 Register payload:", req.body);
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
@@ -63,7 +64,10 @@ export const login = async (req, res) => {
 
     // Generic error (avoid telling which field is incorrect for security)
     if (!user) {
-      console.error("Login error: Invalid email or password for email e:", email);
+      console.error(
+        "Login error: Invalid email or password for email e:",
+        email,
+      );
       return res.status(401).json({
         status: "error",
         message: "Invalid email or password.",
@@ -84,7 +88,7 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     return res.status(200).json({

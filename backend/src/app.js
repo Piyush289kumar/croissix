@@ -57,43 +57,22 @@ const allowedOrigins = [
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// app.use(
-//   cors({
-//     origin: (origin, callback) => {
-//       if (!origin) return callback(null, true); // SSR, Postman, mobile apps
-
-//       if (allowedOrigins.includes(origin)) {
-//         return callback(null, true);
-//       }
-
-//       console.log("❌ Blocked by CORS:", origin);
-//       return callback(new Error("CORS Not Allowed: " + origin));
-//     },
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//   })
-// );
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-
-      // Allow all sslip.io subdomains for staging
-      if (origin.includes("3.108.8.159.sslip.io")) {
-        return callback(null, true);
-      }
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // SSR, Postman, mobile apps
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
       console.log("❌ Blocked by CORS:", origin);
-      callback(new Error("Not allowed by CORS"));
+      return callback(new Error("CORS Not Allowed: " + origin));
     },
     credentials: true,
-  }),
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
 );
 
 app.use(helmet({ crossOriginResourcePolicy: false }));

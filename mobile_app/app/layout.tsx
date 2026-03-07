@@ -1,9 +1,13 @@
+// mobile_app\app\layout.tsx
+
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
 import clsx from "clsx";
 import { Providers } from "./providers";
 import { fontSans } from "@/config/fonts";
 import { siteConfig } from "@/config/site";
+import ReduxProvider from "@/providers/ReduxProvider";
+import QueryProvider from "@/providers/QueryProvider";
 
 export const metadata: Metadata = {
   title: {
@@ -30,12 +34,18 @@ export default function RootLayout({
       <body
         className={clsx(
           "min-h-screen text-foreground bg-background font-sans antialiased",
-          fontSans.variable
+          fontSans.variable,
         )}
       >
-        <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          {children}
-        </Providers>
+        <ReduxProvider>
+          <QueryProvider>
+            <Providers
+              themeProps={{ attribute: "class", defaultTheme: "dark" }}
+            >
+              {children}
+            </Providers>
+          </QueryProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

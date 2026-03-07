@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { KeyRound, Mail, Eye, EyeOff, Sun, Moon } from "lucide-react";
+import { useLogin } from "@/features/auth/hook/useAuth";
+import { useRouter } from "next/navigation";
 
 /* ─── Google G ───────────────────────────────────────────── */
 function GoogleG() {
@@ -173,6 +175,8 @@ function InputField({
 
 /* ═══════════════════════════════════════════════════════════ */
 export default function LoginPage() {
+  const loginMutation = useLogin();
+  const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [email, setEmail] = useState("");
@@ -186,12 +190,26 @@ export default function LoginPage() {
 
   const handleSubmit = () => {
     setError("");
+
     if (!email || !password) {
       setError("Please fill in all fields.");
       return;
     }
-    setLoading(true);
-    setTimeout(() => setLoading(false), 2000);
+
+    loginMutation.mutate(
+      {
+        email,
+        password,
+      },
+      {
+        onSuccess: () => {
+          router.push("/dashboard");
+        },
+        onError: () => {
+          setError("Invalid email or password");
+        },
+      },
+    );
   };
 
   return (
@@ -305,7 +323,7 @@ export default function LoginPage() {
           {/* submit */}
           <button
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loginMutation.isPending}
             className={`
               w-full h-[48px] rounded-[13px]
               flex items-center justify-center gap-2
@@ -320,7 +338,7 @@ export default function LoginPage() {
               boxShadow: "0 4px 18px rgba(37,99,235,0.4)",
             }}
           >
-            {loading ? <Spinner /> : "Sign In"}
+            {loginMutation.isPending ? <Spinner /> : "Sign In"}
           </button>
         </div>
 

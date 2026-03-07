@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { KeyRound, Mail, Eye, EyeOff, User, Phone } from "lucide-react";
+import { useRegister } from "@/features/auth/hook/useAuth";
+import { useRouter } from "next/navigation";
 
 /* ─── Google G ───────────────────────────────────────────── */
 function GoogleG() {
@@ -221,6 +223,8 @@ function validate(fields: {
 
 /* ═══════════════════════════════════════════════════════════ */
 export default function RegisterPage() {
+  const router = useRouter();
+  const registerMutation = useRegister();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -231,20 +235,11 @@ export default function RegisterPage() {
   const [confirm, setConfirm] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [showConf, setShowConf] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => setMounted(true), []);
   const isDark = mounted && resolvedTheme === "dark";
   const strength = getStrength(password);
-
-  const handleSubmit = () => {
-    const errs = validate({ name, phone, email, password, confirm });
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
-    setLoading(true);
-    setTimeout(() => setLoading(false), 2000);
-  };
 
   const eyeBtn = (show: boolean, toggle: () => void, label: string) => (
     <button
@@ -265,10 +260,34 @@ export default function RegisterPage() {
     </button>
   );
 
+  const handleSubmit = () => {
+    const errs = validate({ name, phone, email, password, confirm });
+    setErrors(errs);
+
+    if (Object.keys(errs).length) return;
+
+    registerMutation.mutate(
+      {
+        name,
+        email,
+        password,
+      },
+      {
+        onSuccess: () => {
+          alert("Account created successfully");
+          router.push("/login");
+        },
+        onError: (err: any) => {
+          console.error(err);
+        },
+      },
+    );
+  };
+
   return (
     <div
       className={`
-        min-h-screen flex flex-col transition-colors duration-300  justify-center
+        min-h-screen flex transition-colors duration-300  justify-center
       items-center
         ${isDark ? "bg-[#0d1421]" : "bg-[#eef2fb]"}
       `}
@@ -278,14 +297,9 @@ export default function RegisterPage() {
 
       <div className="flex-1 flex flex-col px-5">
         {/* ── back + heading ── */}
-        <div className="mb-6 text-center">
+        <div className="mb-6 mt-5 text-center">
           <h1
-            className={`text-xl font-black leading-tight mb-1 ${isDark ? "text-white" : "text-slate-900"}`}
-            style={{
-              letterSpacing: "-0.04em",
-              fontFamily:
-                "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
-            }}
+            className={`text-xl font-bold leading-tight mb-1 ${isDark ? "text-white" : "text-slate-900"}`}
           >
             Create account
           </h1>
@@ -419,14 +433,14 @@ export default function RegisterPage() {
           {/* submit */}
           <button
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={registerMutation.isPending}
             className={`
               w-full h-[48px] rounded-[13px] mt-1
               flex items-center justify-center gap-2
               text-[14px] font-bold text-white
               transition-all duration-150
               active:scale-[0.97] disabled:opacity-60
-              ${loading ? "cursor-wait" : "cursor-pointer"}
+             ${registerMutation.isPending ? "cursor-wait" : "cursor-pointer"}
             `}
             style={{
               letterSpacing: "-0.01em",
@@ -434,7 +448,7 @@ export default function RegisterPage() {
               boxShadow: "0 4px 18px rgba(37,99,235,0.4)",
             }}
           >
-            {loading ? <Spinner /> : "Create Account"}
+            {registerMutation.isPending ? <Spinner /> : "Create Account"}
           </button>
         </div>
 
