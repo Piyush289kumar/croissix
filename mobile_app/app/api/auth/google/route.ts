@@ -2,25 +2,28 @@
 
 import { google } from "googleapis";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+
+  const token = searchParams.get("token");
+
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    "http://localhost:3000/api/auth/callback"
+    process.env.GOOGLE_REDIRECT_URI,
   );
-
-  const scopes = [
-    "https://www.googleapis.com/auth/business.manage"
-  ];
 
   const url = oauth2Client.generateAuthUrl({
     access_type: "offline",
-    scope: scopes,
+    scope: [
+      "https://www.googleapis.com/auth/business.manage",
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "openid",
+    ],
     prompt: "consent",
+    state: token || "",
   });
 
   return Response.redirect(url);
 }
-
-
-
