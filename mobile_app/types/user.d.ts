@@ -8,6 +8,8 @@ export interface User {
   provider: string;
   googleId?: string;
   avatar?: string;
+  googleLocationId?: string;
+  googleLocationName: string;
   createdAt: string;
   updatedAt: string;
 }

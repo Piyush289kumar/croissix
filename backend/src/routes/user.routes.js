@@ -1,8 +1,9 @@
 // backend\src\routes\user.routes.js
- 
+
 import { Router } from "express";
 import {
   getProfile,
+  setGoogleLocation,
   updateProfileById,
 } from "../controllers/user.controller.js";
 import { ensureAuth } from "../middleware/authMiddleware.js";
@@ -15,7 +16,9 @@ router.post(
   "/profile/update",
   ensureAuth,
   upload.fields([{ name: "avatar", maxCount: 1 }]),
-  updateProfileById
+  updateProfileById,
 );
+
+router.patch("/google-location", ensureAuth, setGoogleLocation);
 
 export default router;

@@ -45,7 +45,7 @@ export const updateProfileById = async (req, res) => {
       try {
         const upload = await uploadToCloudinary(
           req.files.avatar[0].path,
-          "users/avatar"
+          "users/avatar",
         );
         avatarUrl = upload.secure_url;
 
@@ -79,7 +79,7 @@ export const updateProfileById = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: updatedFields },
-      { new: true, runValidators: true, select: "-password" }
+      { new: true, runValidators: true, select: "-password" },
     );
 
     return res.status(200).json({
@@ -91,6 +91,40 @@ export const updateProfileById = async (req, res) => {
     return res.status(500).json({
       message: "Internal Server Error while updating profile.",
       error: error.message,
+    });
+  }
+};
+
+// Set Google Location
+export const setGoogleLocation = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { locationId, locationName } = req.body;
+
+    if (!locationId) {
+      return res.status(400).json({
+        message: "Location ID is required",
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        googleLocationId: locationId,
+        googleLocationName: locationName,
+      },
+      { new: true },
+    ).select("-password");
+
+    return res.status(200).json({
+      message: "Google location linked successfully",
+      user,
+    });
+  } catch (error) {
+    console.error("Google location link error:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
     });
   }
 };

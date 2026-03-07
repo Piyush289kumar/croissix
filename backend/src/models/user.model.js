@@ -38,6 +38,14 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
     googleTokenExpiry: Date,
+
+    googleLocationId: {
+      type: String,
+    },
+
+    googleLocationName: {
+      type: String,
+    },
   },
   {
     timestamps: true,

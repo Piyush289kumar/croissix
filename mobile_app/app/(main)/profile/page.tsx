@@ -5,7 +5,9 @@ import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { RefreshCcw } from "lucide-react";
+import { LinkIcon, RefreshCcw, Check } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/redux/slices/userSlice";
 
 /*
   Dark palette anchored to rgb(13, 20, 33):
@@ -768,6 +770,53 @@ function LocationRow({
   t: any;
   isDark: boolean;
 }) {
+  const dispatch = useDispatch();
+  const [linkingId, setLinkingId] = useState<string | null>(null);
+  const handleLinkLocation = async (location: any) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+
+      const locationId = location.name.split("/")[1];
+
+      setLinkingId(locationId);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/google-location`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            locationId,
+            locationName: location.title,
+          }),
+        },
+      );
+
+      if (!user) return;
+      // 🔥 Update Redux instantly
+      dispatch(
+        setUser({
+          ...user,
+          googleLocationId: locationId,
+          googleLocationName: location.title,
+        }),
+      );
+      alert(`✅ ${location.title} linked successfully`);
+    } catch (error) {
+      console.error(error);
+      alert(error.message || "Something went wrong");
+    } finally {
+      setLinkingId(null);
+    }
+  };
+  const user = useSelector((state: RootState) => state.user.data);
+  const locationId = location.name.split("/")[1];
+  const isConnected = user?.googleLocationId === locationId;
+
   return (
     <div
       style={{
@@ -813,24 +862,22 @@ function LocationRow({
         </div>
       </div>
 
-      <a
-        href={googleLink}
-        target="_blank"
-        style={{
-          background: "#4285F4",
-          color: "white",
-          borderRadius: 20,
-          padding: "4px 10px",
-          fontSize: 11,
-          fontWeight: 600,
-          textDecoration: "none",
-          display: "flex",
-          alignItems: "center",
-          gap: 4,
-        }}
-      >
-        Link <ExternalLinkIcon />
-      </a>
+      {isConnected ? (
+        <span className="text-green-500 text-xs font-semibold flex items-center gap-1">
+          <Check size={12} /> Connected
+        </span>
+      ) : (
+        <button
+          onClick={() => handleLinkLocation(location)}
+          disabled={linkingId === locationId}
+          className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 
+    text-white text-xs font-semibold px-3 py-1 rounded-full 
+    disabled:opacity-60 transition"
+        >
+          {linkingId === locationId ? "Linking..." : "Link"}
+          <LinkIcon size={12} />
+        </button>
+      )}
     </div>
   );
 }
