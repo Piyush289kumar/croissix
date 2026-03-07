@@ -7,10 +7,12 @@ import User from "../models/user.model.js";
 export const register = async (req, res) => {
   try {
     console.log("📥 Register payload:", req.body);
-    const { name, email, password } = req.body;
+    const { name, email, phone, password } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: "All fields are required." });
+    if (!name || !email || !phone || !password) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
     }
 
     const existingUser = await User.findOne({ email });
@@ -18,10 +20,21 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: "Email already registered" });
     }
 
+    // check phone
+    const existingPhone = await User.findOne({ phone });
+
+    if (existingPhone) {
+      return res.status(400).json({
+        message: "Phone number already registered",
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
+    
     const user = await User.create({
       name,
       email,
+      phone,
       password: hashedPassword,
       provider: "local",
     });
@@ -31,6 +44,7 @@ export const register = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
+        phone: user.phone,
         email: user.email,
       },
     });
@@ -44,7 +58,6 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    console.log("📥 Incoming login payload:", req.body);
     let { email, password } = req.body;
 
     // Normalize email (avoid case sensitivity issues)

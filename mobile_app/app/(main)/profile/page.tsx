@@ -1091,7 +1091,7 @@ export default function ProfilePage() {
                     "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
                 }}
               >
-                Alex Johnson
+                {user?.name ?? "N/A"}
               </span>
               <span style={{ color: "#3b82f6", cursor: "pointer" }}>
                 {Icon.edit}
@@ -1105,7 +1105,7 @@ export default function ProfilePage() {
                 fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
               }}
             >
-              +91 98765 43210
+              {user?.phone ?? "N/A"}
             </div>
           </div>
 
@@ -1211,7 +1211,6 @@ export default function ProfilePage() {
               t={t}
               onClick={!user?.googleId ? connectGoogle : undefined}
             />
-
             <Row
               icon={<GoogleG />}
               iconBg="#4285F4"

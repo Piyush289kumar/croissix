@@ -5,6 +5,7 @@ import { API } from "@/lib/axiosClient";
 export interface RegisterPayload {
   name: string;
   email: string;
+  phone: string;
   password: string;
 }
 

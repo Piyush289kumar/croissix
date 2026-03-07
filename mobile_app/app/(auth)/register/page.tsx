@@ -270,6 +270,7 @@ export default function RegisterPage() {
       {
         name,
         email,
+        phone,
         password,
       },
       {

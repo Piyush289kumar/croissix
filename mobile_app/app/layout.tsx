@@ -8,6 +8,7 @@ import { fontSans } from "@/config/fonts";
 import { siteConfig } from "@/config/site";
 import ReduxProvider from "@/providers/ReduxProvider";
 import QueryProvider from "@/providers/QueryProvider";
+import UserLoader from "@/components/data-loader/UserLoader";
 
 export const metadata: Metadata = {
   title: {
@@ -42,6 +43,7 @@ export default function RootLayout({
             <Providers
               themeProps={{ attribute: "class", defaultTheme: "dark" }}
             >
+              <UserLoader />
               {children}
             </Providers>
           </QueryProvider>
