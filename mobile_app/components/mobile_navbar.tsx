@@ -23,17 +23,63 @@ function SearchIcon() {
 
 function AISparkle() {
   return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="overflow-visible"
+    >
+      <style>{`
+        @keyframes gemini-star {
+          0%,100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+          25%      { transform: scale(1.2) rotate(12deg); filter: brightness(1.4); }
+          50%      { transform: scale(0.85) rotate(0deg); filter: brightness(0.9); }
+          75%      { transform: scale(1.15) rotate(-10deg); filter: brightness(1.3); }
+        }
+        @keyframes gemini-shimmer {
+          0%,100% { stop-color: white; stop-opacity: 0.9; }
+          33%      { stop-color: #a5f3fc; stop-opacity: 1; }
+          66%      { stop-color: #c4b5fd; stop-opacity: 1; }
+        }
+        @keyframes gemini-dot-a {
+          0%,100% { r: 1.2; opacity: 0.5; }
+          50%      { r: 1.8; opacity: 1;   }
+        }
+        @keyframes gemini-dot-b {
+          0%,100% { r: 1; opacity: 0.4; }
+          50%      { r: 1.5; opacity: 0.9; }
+        }
+        .g-star    { transform-origin:12px 11px; animation: gemini-star 2.8s ease-in-out infinite; }
+        .g-stop1   { animation: gemini-shimmer 2.8s ease-in-out infinite; }
+        .g-stop2   { animation: gemini-shimmer 2.8s ease-in-out infinite 0.9s; }
+        .g-stop3   { animation: gemini-shimmer 2.8s ease-in-out infinite 1.8s; }
+        .g-dot-a   { transform-origin:19.5px 4.5px; animation: gemini-dot-a 2.8s ease-in-out infinite 0.5s; }
+        .g-dot-b   { transform-origin:4.5px 19px;   animation: gemini-dot-b 2.8s ease-in-out infinite 1.1s; }
+      `}</style>
+
+      <defs>
+        <linearGradient id="geminiGrad" x1="3" y1="2" x2="21" y2="20" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   className="g-stop1" stopColor="white"   stopOpacity="0.9" />
+          <stop offset="50%"  className="g-stop2" stopColor="#a5f3fc" stopOpacity="1"   />
+          <stop offset="100%" className="g-stop3" stopColor="#c4b5fd" stopOpacity="1"   />
+        </linearGradient>
+      </defs>
+
+      {/* main star — animated shape + gradient fill */}
       <path
+        className="g-star"
         d="M12 2L13.8 9.2L21 11L13.8 12.8L12 20L10.2 12.8L3 11L10.2 9.2L12 2Z"
-        stroke="white"
-        strokeWidth="1.6"
+        stroke="url(#geminiGrad)"
+        strokeWidth="1.5"
         strokeLinejoin="round"
-        fill="white"
-        fillOpacity="0.25"
+        fill="url(#geminiGrad)"
+        fillOpacity="0.3"
       />
-      <circle cx="19.5" cy="4.5" r="1.2" fill="white" fillOpacity="0.7" />
-      <circle cx="4.5" cy="19" r="1" fill="white" fillOpacity="0.5" />
+
+      {/* satellite dots */}
+      <circle className="g-dot-a" cx="19.5" cy="4.5" r="1.2" fill="url(#geminiGrad)" />
+      <circle className="g-dot-b" cx="4.5"  cy="19"  r="1"   fill="url(#geminiGrad)" />
     </svg>
   );
 }
