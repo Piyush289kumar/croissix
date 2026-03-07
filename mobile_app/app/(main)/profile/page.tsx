@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 /*
   Dark palette anchored to rgb(13, 20, 33):
@@ -979,15 +981,33 @@ export default function ProfilePage() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+  const user = useSelector((state: RootState) => state.user.data);
+
   useEffect(() => setMounted(true), []);
   const isDark = mounted && resolvedTheme === "dark";
   const t = isDark ? D : L;
+
+  const connectGoogle = () => {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      alert("Please login first");
+      return;
+    }
+
+    if (user?.googleId) {
+      alert("Your Google account is already connected.");
+      return;
+    }
+
+    window.location.href = `/api/auth/google?token=${token}`;
+  };
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        paddingTop:"0.5rem",
+        paddingTop: "0.5rem",
         background: t.pageBg,
         transition: "background .3s",
       }}
@@ -1180,11 +1200,26 @@ export default function ProfilePage() {
             gap: 10,
           }}
         >
-
-          
           <GoogleProfileRow t={t} isDark={isDark} />
-          
+
           <Section t={t}>
+            <Row
+              icon={<GoogleG />}
+              iconBg="#4285F4"
+              label="Google Business"
+              value={user?.googleId ? "Connected" : "Not Connected"}
+              t={t}
+              onClick={!user?.googleId ? connectGoogle : undefined}
+            />
+
+            <Row
+              icon={<GoogleG />}
+              iconBg="#4285F4"
+              label="Connect Google Business"
+              t={t}
+              onClick={connectGoogle}
+            />
+
             <Row
               icon={Icon.notification}
               iconBg="#f97316"
@@ -1211,7 +1246,6 @@ export default function ProfilePage() {
               t={t}
             />
           </Section>
-
 
           <style>{`@keyframes gmbSlideIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}`}</style>
 

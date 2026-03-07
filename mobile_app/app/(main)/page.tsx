@@ -1,3 +1,5 @@
+// mobile_app\app\(main)\page.tsx
+
 import CibilScore from "@/components/cards/Cibilscore";
 
 export default function Home() {

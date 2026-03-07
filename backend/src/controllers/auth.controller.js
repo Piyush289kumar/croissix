@@ -111,6 +111,57 @@ export const login = async (req, res) => {
 };
 
 // -------------------------
+// Google OAuth
+// -------------------------
+// Link Google Account
+export const linkGoogleAccount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const { googleId } = req.body;
+
+    if (!googleId) {
+      return res.status(400).json({
+        message: "Google ID is required",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // prevent linking multiple accounts
+    const existingGoogleUser = await User.findOne({ googleId });
+
+    if (existingGoogleUser && existingGoogleUser._id.toString() !== userId) {
+      return res.status(400).json({
+        message: "This Google account is already linked to another user.",
+      });
+    }
+
+    user.googleId = googleId;
+    user.provider = "google";
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "Google account linked successfully",
+      user,
+    });
+  } catch (error) {
+    console.error("Google link error:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+// -------------------------
 // Logout user (JWT) - optimized
 // -------------------------
 export const logout = async (req, res) => {

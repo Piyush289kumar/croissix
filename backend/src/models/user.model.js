@@ -26,11 +26,18 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
     },
+    googleAccessToken: {
+      type: String,
+    },
+    googleRefreshToken: {
+      type: String,
+    },
+    googleTokenExpiry: Date,
   },
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
 const User = mongoose.model("User", userSchema);
