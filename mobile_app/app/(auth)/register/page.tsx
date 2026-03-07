@@ -268,16 +268,13 @@ export default function RegisterPage() {
   return (
     <div
       className={`
-        min-h-screen flex flex-col transition-colors duration-300
+        min-h-screen flex flex-col transition-colors duration-300  justify-center
+      items-center
         ${isDark ? "bg-[#0d1421]" : "bg-[#eef2fb]"}
       `}
-      style={{
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif",
-      }}
     >
       {/* ── status bar spacer ── */}
-      <div className="h-20" />
+      <div className="h-10" />
 
       <div className="flex-1 flex flex-col px-5">
         {/* ── back + heading ── */}
