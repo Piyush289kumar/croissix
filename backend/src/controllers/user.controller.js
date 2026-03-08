@@ -21,6 +21,9 @@ export const getProfile = async (req, res) => {
         googleAccessToken: user.googleAccessToken,
         googleRefreshToken: user.googleRefreshToken,
         googleTokenExpiry: user.googleTokenExpiry,
+        googleLocationId: user.googleLocationId || null,
+        googleLocationName: user.googleLocationName || null,
+        avatar: user.avatar || null,
       },
     });
   } catch (error) {

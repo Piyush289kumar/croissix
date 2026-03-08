@@ -1,63 +1,136 @@
 // mobile_app\app\api\google\reviews\route.ts
 
-
-import axios from "axios";
-import { getAuthClient } from "@/lib/googleAuth";
 import { google } from "googleapis";
+import axios from "axios";
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const locationName = searchParams.get("location"); 
-  // example: locations/8008899913666095565
-
-  if (!locationName) {
-    return Response.json({ error: "No location provided" });
-  }
+  console.log("----- GOOGLE REVIEWS API START -----");
 
   try {
-    // ✅ get auth from cookies
-    const auth = await getAuthClient();
+    const { searchParams } = new URL(req.url);
 
-    if (!auth) {
-      return Response.json({ error: "Authentication failed" });
+    const locationName = searchParams.get("location");
+    const token = req.headers.get("authorization");
+
+    console.log("Incoming request URL:", req.url);
+    console.log("Location param:", locationName);
+    console.log("Authorization header:", token);
+
+    if (!token) {
+      console.log("❌ No token provided");
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 1️⃣ Get accountId
-    const accountService = google.mybusinessaccountmanagement({
-      version: "v1",
-      auth,
+    if (!locationName) {
+      console.log("❌ Location missing");
+      return Response.json(
+        { success: false, error: "Location is required" },
+        { status: 400 }
+      );
+    }
+
+    console.log("🔹 Fetching user profile from backend...");
+
+    const profile = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/users/profile/view`,
+      {
+        headers: { Authorization: token },
+      }
+    );
+
+    console.log("Profile response:", profile.data);
+
+    const user = profile.data.user;
+
+    console.log("User extracted:", user);
+
+    if (!user.googleAccessToken) {
+      console.log("❌ No Google access token stored for user");
+      return Response.json(
+        { success: false, error: "Google not connected" },
+        { status: 401 }
+      );
+    }
+
+    console.log("🔹 Creating OAuth client");
+
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET
+    );
+
+    oauth2Client.setCredentials({
+      access_token: user.googleAccessToken,
+      refresh_token: user.googleRefreshToken,
     });
 
-    const accounts = await accountService.accounts.list();
-    const accountId = accounts.data.accounts?.[0]?.name;
+    console.log("OAuth credentials set");
+
+    console.log("🔹 Fetching Google Business accounts");
+
+    const accountService = google.mybusinessaccountmanagement({
+      version: "v1",
+      auth: oauth2Client,
+    });
+
+    const accountsRes = await accountService.accounts.list({});
+
+    console.log("Accounts response:", accountsRes.data);
+
+    const accountId = accountsRes.data.accounts?.[0]?.name;
+
+    console.log("Account ID:", accountId);
 
     if (!accountId) {
-      return Response.json({ error: "No account found" });
+      console.log("❌ No Google Business account found");
+      return Response.json(
+        { success: false, error: "No Google Business account found" },
+        { status: 404 }
+      );
     }
 
-    // 2️⃣ Extract locationId
-    const locationId = locationName.split("/")[1];
+    const locationId = locationName.split("/").pop();
 
-    // 3️⃣ Get access_token safely
-    const accessToken = auth.credentials.access_token;
+    console.log("Extracted locationId:", locationId);
 
     const url = `https://mybusiness.googleapis.com/v4/${accountId}/locations/${locationId}/reviews`;
 
-    const res = await axios.get(url, {
+    console.log("Google Reviews API URL:", url);
+
+    console.log("🔹 Calling Google Reviews API...");
+
+    const res = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${user.googleAccessToken}`,
       },
     });
 
+    console.log("Google API status:", res.status);
+
+    const data = await res.json();
+
+    console.log("Google Reviews response:", data);
+
+    console.log("----- GOOGLE REVIEWS API SUCCESS -----");
+
     return Response.json({
-      reviews: res.data.reviews || [],
+      success: true,
+      reviews: data.reviews || [],
     });
 
-  } catch (error: unknown) {
-    console.error("Reviews error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return Response.json({
-      error: errorMessage,
-    }, { status: 500 });
+  } catch (error: any) {
+    console.error("🔥 GOOGLE REVIEWS ERROR:", error);
+
+    if (error.response) {
+      console.error("Google API Response:", error.response.data);
+    }
+
+    return Response.json(
+      {
+        success: false,
+        error: error.message || "Failed to fetch reviews",
+      },
+      { status: 500 }
+    );
   }
 }

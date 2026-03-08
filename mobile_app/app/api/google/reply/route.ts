@@ -1,44 +1,53 @@
 // app/api/google/reply/route.ts
 
-import axios from "axios";
-import { getAuthClient } from "@/app/lib/googleAuth";
-import { google } from "googleapis";
+import { getAuthClient } from "@/lib/googleAuth";
 
 export async function POST(req: Request) {
-  const { reviewName, comment } = await req.json();
-  // reviewName example:
-  // accounts/123456/locations/78910/reviews/111213
-
-  if (!reviewName || !comment) {
-    return Response.json({ error: "Missing data" }, { status: 400 });
-  }
-
   try {
-    const auth = await getAuthClient();
-    if (!auth) {
-      return Response.json({ error: "Authentication failed" }, { status: 401 });
+    const body = await req.json();
+    const { reviewName, comment } = body;
+
+    if (!reviewName || !comment) {
+      return Response.json(
+        { success: false, error: "reviewName and comment are required" },
+        { status: 400 }
+      );
     }
 
-    const accessToken = auth.credentials.access_token;
+    const auth = await getAuthClient();
+    if (!auth) {
+      return Response.json(
+        { success: false, error: "Google authentication failed" },
+        { status: 401 }
+      );
+    }
 
     const url = `https://mybusiness.googleapis.com/v4/${reviewName}/reply`;
 
-    const res = await axios.put(
-      url,
-      { comment },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${auth.credentials.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ comment }),
+    });
 
-    return Response.json(res.data);
+    const data = await res.json();
+
+    return Response.json({
+      success: true,
+      data,
+    });
 
   } catch (error: any) {
-    console.error("Reply error:", error.response?.data || error);
+    console.error("Reply Error:", error);
+
     return Response.json(
-      { error: error.response?.data || error.message },
+      {
+        success: false,
+        error: error.message || "Failed to reply to review",
+      },
       { status: 500 }
     );
   }

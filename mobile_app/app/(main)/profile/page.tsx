@@ -532,8 +532,8 @@ function GoogleProfileRow({
         },
       });
 
-      console.log('res', res);
-      
+      console.log("res", res);
+
       const data = await res.json();
 
       setLocations(data.locations || []);
@@ -823,7 +823,7 @@ function LocationRow({
     }
   };
   const user = useSelector((state: RootState) => state.user.data);
-  const locationId = location.name.split("/")[1];
+  const locationId = location.name.split("/").pop();
   const isConnected = user?.googleLocationId === locationId;
 
   return (
