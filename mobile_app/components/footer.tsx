@@ -23,35 +23,74 @@ const navItems = [
     ),
   },
   {
-    href: "/reviews/google",
-    label: "Reviews",
+    href: "/analysis",
+    label: "Analysis",
     icon: (active: boolean) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <circle
-          cx="11" cy="11" r="7.5"
-          stroke="currentColor" strokeWidth="1.8"
+          cx="11"
+          cy="11"
+          r="7.5"
+          stroke="currentColor"
+          strokeWidth="1.8"
           fill={active ? "currentColor" : "none"}
           fillOpacity={active ? 0.15 : 0}
         />
-        <path d="M17 17L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path
+          d="M17 17L21 21"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
         {active && <circle cx="11" cy="11" r="3" fill="currentColor" />}
       </svg>
     ),
   },
   {
-    href: "/notifications",
-    label: "Alerts",
-    badge: 3,
+    href: "/post",
+    label: "Post",
     icon: (active: boolean) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-          stroke="currentColor" strokeWidth="1.8"
-          strokeLinecap="round" strokeLinejoin="round"
+        <circle
+          cx="11"
+          cy="11"
+          r="7.5"
+          stroke="currentColor"
+          strokeWidth="1.8"
           fill={active ? "currentColor" : "none"}
           fillOpacity={active ? 0.15 : 0}
         />
-        <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path
+          d="M17 17L21 21"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+        {active && <circle cx="11" cy="11" r="3" fill="currentColor" />}
+      </svg>
+    ),
+  },
+  {
+    href: "/reviews/google",
+    label: "Reviews",
+    icon: (active: boolean) => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <circle
+          cx="11"
+          cy="11"
+          r="7.5"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          fill={active ? "currentColor" : "none"}
+          fillOpacity={active ? 0.15 : 0}
+        />
+        <path
+          d="M17 17L21 21"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+        {active && <circle cx="11" cy="11" r="3" fill="currentColor" />}
       </svg>
     ),
   },
@@ -60,10 +99,23 @@ const navItems = [
     label: "Profile",
     icon: (active: boolean) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8"
-          fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.15 : 0} />
-        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" strokeWidth="1.8"
-          strokeLinecap="round" fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.1 : 0} />
+        <circle
+          cx="12"
+          cy="8"
+          r="4"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          fill={active ? "currentColor" : "none"}
+          fillOpacity={active ? 0.15 : 0}
+        />
+        <path
+          d="M4 20c0-4 3.6-7 8-7s8 3 8 7"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          fill={active ? "currentColor" : "none"}
+          fillOpacity={active ? 0.1 : 0}
+        />
       </svg>
     ),
   },
@@ -85,31 +137,35 @@ export default function Footer() {
 
       <footer
         className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
-        style={{
-          /* Switch CSS vars by toggling a data attribute so all tokens update at once */
-          ...(mounted && isDark
-            ? {
-                "--color-nav-bg":        "var(--color-nav-bg-dark)",
-                "--color-nav-border":    "var(--color-nav-border-dark)",
-                "--color-nav-active":    "var(--color-nav-active-dark)",
-                "--color-nav-active-bg": "var(--color-nav-active-bg-dark)",
-                "--color-nav-inactive":  "var(--color-nav-inactive-dark)",
-                "--color-nav-shadow":    "var(--color-nav-shadow-dark)",
-                "--color-badge-border":  "var(--color-badge-border-dark)",
-              }
-            : {}),
-          background: "var(--color-nav-bg)",
-          backdropFilter: "blur(24px) saturate(180%)",
-          WebkitBackdropFilter: "blur(24px) saturate(180%)",
-          borderTop: "1px solid var(--color-nav-border)",
-          paddingBottom: "env(safe-area-inset-bottom)",
-          boxShadow: "0 -4px 32px var(--color-nav-shadow)",
-          transition: "background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
-        } as React.CSSProperties}
+        style={
+          {
+            /* Switch CSS vars by toggling a data attribute so all tokens update at once */
+            ...(mounted && isDark
+              ? {
+                  "--color-nav-bg": "var(--color-nav-bg-dark)",
+                  "--color-nav-border": "var(--color-nav-border-dark)",
+                  "--color-nav-active": "var(--color-nav-active-dark)",
+                  "--color-nav-active-bg": "var(--color-nav-active-bg-dark)",
+                  "--color-nav-inactive": "var(--color-nav-inactive-dark)",
+                  "--color-nav-shadow": "var(--color-nav-shadow-dark)",
+                  "--color-badge-border": "var(--color-badge-border-dark)",
+                }
+              : {}),
+            background: "var(--color-nav-bg)",
+            backdropFilter: "blur(24px) saturate(180%)",
+            WebkitBackdropFilter: "blur(24px) saturate(180%)",
+            borderTop: "1px solid var(--color-nav-border)",
+            paddingBottom: "env(safe-area-inset-bottom)",
+            boxShadow: "0 -4px 32px var(--color-nav-shadow)",
+            transition:
+              "background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
+          } as React.CSSProperties
+        }
       >
         <nav className="flex items-center justify-around px-2 pt-2 pb-1">
           {navItems.map(({ href, label, icon, badge }) => {
-            const active = href === "/" ? pathname === "/" : pathname?.startsWith(href);
+            const active =
+              href === "/" ? pathname === "/" : pathname?.startsWith(href);
 
             return (
               <Link
@@ -128,8 +184,12 @@ export default function Footer() {
                     alignItems: "center",
                     justifyContent: "center",
                     position: "relative",
-                    background: active ? "var(--color-nav-active-bg)" : "transparent",
-                    color: active ? "var(--color-nav-active)" : "var(--color-nav-inactive)",
+                    background: active
+                      ? "var(--color-nav-active-bg)"
+                      : "transparent",
+                    color: active
+                      ? "var(--color-nav-active)"
+                      : "var(--color-nav-inactive)",
                     transition: "background 0.2s ease, color 0.2s ease",
                   }}
                 >
@@ -154,7 +214,8 @@ export default function Footer() {
                         justifyContent: "center",
                         padding: "0 4px",
                         border: "2px solid var(--color-badge-border)",
-                        fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+                        fontFamily:
+                          "-apple-system, BlinkMacSystemFont, sans-serif",
                         transition: "border-color 0.3s ease",
                       }}
                     >
@@ -169,8 +230,11 @@ export default function Footer() {
                     fontSize: 10,
                     fontWeight: active ? 600 : 400,
                     letterSpacing: "0.01em",
-                    color: active ? "var(--color-nav-active)" : "var(--color-nav-inactive)",
-                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--font-sans)",
+                    color: active
+                      ? "var(--color-nav-active)"
+                      : "var(--color-nav-inactive)",
+                    fontFamily:
+                      "-apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--font-sans)",
                     transition: "color 0.2s ease",
                     lineHeight: 1.2,
                   }}
@@ -193,7 +257,6 @@ export default function Footer() {
               </Link>
             );
           })}
-
         </nav>
       </footer>
     </>
