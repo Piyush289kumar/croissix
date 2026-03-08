@@ -30,7 +30,7 @@ export const register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     const user = await User.create({
       name,
       email,
@@ -112,6 +112,12 @@ export const login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
+        provider: user.provider,
+        googleId: user.googleId || null,
+        googleLocationId: user.googleLocationId || null,
+        googleLocationName: user.googleLocationName || null,
+        avatar: user.avatar || null,
       },
     });
   } catch (error) {
@@ -131,7 +137,12 @@ export const linkGoogleAccount = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const { googleId } = req.body;
+    const {
+      googleId,
+      googleAccessToken,
+      googleRefreshToken,
+      googleTokenExpiry,
+    } = req.body;
 
     if (!googleId) {
       return res.status(400).json({
@@ -157,6 +168,9 @@ export const linkGoogleAccount = async (req, res) => {
     }
 
     user.googleId = googleId;
+    user.googleAccessToken = googleAccessToken;
+    user.googleRefreshToken = googleRefreshToken;
+    user.googleTokenExpiry = googleTokenExpiry;
     user.provider = "google";
 
     await user.save();

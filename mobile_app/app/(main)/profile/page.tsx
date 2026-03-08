@@ -8,6 +8,8 @@ import { RootState } from "@/redux/store";
 import { LinkIcon, RefreshCcw, Check } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slices/userSlice";
+import { clearUser } from "@/redux/slices/userSlice";
+import { useRouter } from "next/navigation";
 
 /*
   Dark palette anchored to rgb(13, 20, 33):
@@ -524,7 +526,14 @@ function GoogleProfileRow({
     try {
       setLoading(true);
 
-      const res = await fetch("/api/google/locations");
+      const res = await fetch("/api/google/locations", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+
+      console.log('res', res);
+      
       const data = await res.json();
 
       setLocations(data.locations || []);
@@ -887,27 +896,44 @@ export default function ProfilePage() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+  const dispatch = useDispatch();
+  const router = useRouter();
+
   const user = useSelector((state: RootState) => state.user.data);
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+
+      if (token) {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+
+      // 🔥 clear storage
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("lastExternalReferrer");
+      localStorage.removeItem("lastExternalReferrerTime");
+      localStorage.removeItem("topicsLastReferenceTime");
+
+      sessionStorage.clear();
+
+      // redux reset
+      dispatch(clearUser());
+
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
 
   useEffect(() => setMounted(true), []);
   const isDark = mounted && resolvedTheme === "dark";
   const t = isDark ? D : L;
-
-  // const connectGoogle = () => {
-  //   const token = localStorage.getItem("accessToken");
-
-  //   if (!token) {
-  //     alert("Please login first");
-  //     return;
-  //   }
-
-  //   if (user?.googleId) {
-  //     alert("Your Google account is already connected.");
-  //     return;
-  //   }
-
-  //   window.location.href = `/api/auth/google?token=${token}`;
-  // };
 
   return (
     <div
@@ -1163,6 +1189,7 @@ export default function ProfilePage() {
               label="Log Out"
               destructive
               t={t}
+              onClick={handleLogout}
             />
           </Section>
 

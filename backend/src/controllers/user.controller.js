@@ -9,7 +9,20 @@ import {
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password").lean();
-    res.status(200).json({ message: "Profile fetch successfully", user });
+    res.status(200).json({
+      message: "Profile fetch successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        provider: user.provider,
+        googleId: user.googleId,
+        googleAccessToken: user.googleAccessToken,
+        googleRefreshToken: user.googleRefreshToken,
+        googleTokenExpiry: user.googleTokenExpiry,
+      },
+    });
   } catch (error) {
     console.error("Error feching profile: ", error.message);
 

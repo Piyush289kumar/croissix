@@ -1,23 +1,43 @@
 // mobile_app\app\api\google\locations\route.ts
 
 import { google } from "googleapis";
-import { getAuthClient } from "@/lib/googleAuth";
+import axios from "axios";
 
-export async function GET() {
-  const auth = await getAuthClient();
+export async function GET(req: Request) {
+  const token = req.headers.get("authorization");
 
-  if (!auth) {
-    return Response.json({ error: "Authentication failed" }, { status: 401 });
+  if (!token) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // get user profile from backend
+  const profile = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/users/profile/view`,
+    {
+      headers: { Authorization: token },
+    }
+  );
+
+  const user = profile.data.user;
+
+  if (!user.googleAccessToken) {
+    return Response.json({ error: "Google not connected" }, { status: 401 });
+  }
+
+  const oauth2Client = new google.auth.OAuth2();
+  oauth2Client.setCredentials({
+    access_token: user.googleAccessToken,
+    refresh_token: user.googleRefreshToken,
+  });
 
   const accountService = google.mybusinessaccountmanagement({
     version: "v1",
-    auth,
+    auth: oauth2Client,
   });
 
   const infoService = google.mybusinessbusinessinformation({
     version: "v1",
-    auth,
+    auth: oauth2Client,
   });
 
   const accounts = await accountService.accounts.list();
@@ -31,8 +51,6 @@ export async function GET() {
       readMask:
         "name,title,storeCode,phoneNumbers,websiteUri,storefrontAddress,openInfo",
     });
-    
-    console.log(locations.data.locations);
 
     if (locations.data.locations) {
       allLocations = [...allLocations, ...locations.data.locations];
