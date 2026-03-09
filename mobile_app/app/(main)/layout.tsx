@@ -1,3 +1,5 @@
+// mobile_app\app\(main)\layout.tsx
+
 import Footer from "@/components/footer";
 import { MobileNavbar } from "@/components/mobile_navbar";
 
