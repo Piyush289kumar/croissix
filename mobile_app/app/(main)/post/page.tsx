@@ -33,6 +33,7 @@ import {
   MessageSquare,
   Image as ImageIcon,
 } from "lucide-react";
+import Image from "next/image";
 
 /* ══════════════════════════════════════════════════════════
    TYPES
@@ -410,14 +411,17 @@ function PostCard({
     >
       {/* image strip */}
       {post.imageUrl && (
-        <div className="relative h-36 overflow-hidden">
-          <img
-            src={post.imageUrl}
-            alt=""
-            className="w-full h-full object-cover"
+        <div className="relative h-[20rem] overflow-hidden">
+          <Image
+            src={post.imageUrl!}
+            alt="Error"
+            width={500}
+            height={1200}
+            className="object-cover"
+            unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-          <div className="absolute bottom-2 left-3 flex items-center gap-1.5">
+          <div className="absolute top-2 right-2 flex items-center gap-1.5">
             <span
               className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${typeColor(post.topicType, isDark)}`}
             >
@@ -755,37 +759,27 @@ export default function GooglePostsPage() {
               <GoogleLogo />
               <h1
                 className={`text-[18px] font-black tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}
-                style={{
-                  fontFamily: "-apple-system,'SF Pro Display',sans-serif",
-                  letterSpacing: "-0.03em",
-                }}
               >
                 My Posts
               </h1>
-              {total > 0 && (
-                <span
-                  className={`text-[11px] font-bold px-2 py-0.5 rounded-full
-                  ${isDark ? "bg-white/[0.08] text-slate-400" : "bg-slate-100 text-slate-500"}`}
-                >
-                  {total}
-                </span>
-              )}
             </div>
             {user?.googleLocationName && (
               <div className="flex items-center gap-1.5">
                 <Building2
-                  size={11}
-                  className={isDark ? "text-slate-600" : "text-slate-400"}
+                  size={22}
+                  className={isDark ? "text-slate-600" : "text-slate-500"}
                 />
                 <span
-                  className={`text-[12px] ${isDark ? "text-slate-500" : "text-slate-400"}`}
+                  className={`text-[12px] ${isDark ? "text-slate-500" : "text-slate-500"}`}
                 >
                   {user.googleLocationName}
                 </span>
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2">
+        </div>
+        <div>
+          <div className="flex items-center justify-end gap-2 pb-4">
             <button
               onClick={() => refetch()}
               disabled={isLoading}

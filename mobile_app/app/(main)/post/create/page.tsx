@@ -1,6 +1,5 @@
 // mobile_app\app\(main)\post\create\page.tsx
 
-
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -32,6 +31,7 @@ import {
   Upload,
   Loader2,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 /* ══════════════════════════════════════════════════════════
    TYPES
@@ -768,66 +768,6 @@ function PreviewModal({
 }
 
 /* ══════════════════════════════════════════════════════════
-   SUCCESS STATE
-══════════════════════════════════════════════════════════ */
-function SuccessView({
-  schedule,
-  isDark,
-  onNew,
-}: {
-  schedule: ScheduleDate | null;
-  isDark: boolean;
-  onNew: () => void;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center gap-5">
-      <div className="relative">
-        <div
-          className="w-24 h-24 rounded-full flex items-center justify-center"
-          style={{
-            background: "rgba(34,197,94,0.15)",
-            boxShadow: "0 0 40px rgba(34,197,94,0.25)",
-          }}
-        >
-          <CheckCircle2 size={44} className="text-green-500" />
-        </div>
-        <div className="absolute -top-1 -right-1 w-7 h-7 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-          <span className="text-white text-[11px] font-bold">✓</span>
-        </div>
-      </div>
-      <div>
-        <h2
-          className={`text-[24px] font-black mb-2 ${isDark ? "text-white" : "text-slate-900"}`}
-          style={{
-            fontFamily: "-apple-system,'SF Pro Display',sans-serif",
-            letterSpacing: "-0.04em",
-          }}
-        >
-          {schedule ? "Post Scheduled!" : "Post Published!"}
-        </h2>
-        <p
-          className={`text-[13.5px] leading-relaxed max-w-xs ${isDark ? "text-slate-500" : "text-slate-400"}`}
-        >
-          {schedule
-            ? `Your post will go live on ${formatSchedule(schedule)}`
-            : "Your post is now live on Google Business Profile. It may take a few minutes to appear."}
-        </p>
-      </div>
-      <button
-        onClick={onNew}
-        className="h-12 px-10 rounded-2xl text-[14px] font-bold text-white transition-all active:scale-95"
-        style={{
-          background: "linear-gradient(135deg,#1d4ed8,#3b82f6)",
-          boxShadow: "0 4px 20px rgba(37,99,235,0.40)",
-        }}
-      >
-        Create Another Post
-      </button>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════
    STEP INDICATOR (uploading → posting)
 ══════════════════════════════════════════════════════════ */
 function StepBadge({
@@ -878,6 +818,7 @@ function StepBadge({
    PAGE
 ══════════════════════════════════════════════════════════ */
 export default function GooglePostPage() {
+  const router = useRouter();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -921,9 +862,15 @@ export default function GooglePostPage() {
   /* ── TanStack mutation: publish post ── */
   const postMutation = useMutation({
     mutationFn: publishPost,
+
     onSuccess: () => {
       submittingRef.current = false;
+
+      alert("✅ Post created successfully!");
+
+      router.push("/post"); // go to posts list page
     },
+
     onError: () => {
       submittingRef.current = false;
     },
@@ -1093,17 +1040,6 @@ export default function GooglePostPage() {
         className={`min-h-screen ${isDark ? "bg-[#0d1421]" : "bg-[#eef2fb]"}`}
       >
         <PageSkeleton isDark={isDark} />
-      </div>
-    );
-
-  /* ── success ── */
-  if (postMutation.isSuccess)
-    return (
-      <div
-        className={`min-h-screen ${isDark ? "bg-[#0d1421]" : "bg-[#eef2fb]"}`}
-        style={{ fontFamily: "-apple-system,'SF Pro Text',sans-serif" }}
-      >
-        <SuccessView schedule={schedule} isDark={isDark} onNew={resetForm} />
       </div>
     );
 

@@ -1,4 +1,12 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "**.googleusercontent.com" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "res.cloudinary.com" }, // for uploaded post images
+    ],
+  },
+};
 
 export default nextConfig;
