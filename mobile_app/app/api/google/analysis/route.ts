@@ -13,36 +13,43 @@ function sum(arr: { value: number }[] | undefined) {
 }
 
 export async function GET(req: Request) {
-
   console.log("===== GOOGLE ANALYTICS v4 =====");
 
   try {
-
     /* params */
     const { searchParams } = new URL(req.url);
     const locationId = searchParams.get("locationId");
     const range = searchParams.get("range") || "30d";
 
     if (!locationId) {
-      return Response.json({ success: false, error: "locationId required" }, { status: 400 });
+      return Response.json(
+        { success: false, error: "locationId required" },
+        { status: 400 },
+      );
     }
 
     /* auth */
     const authHeader = req.headers.get("authorization");
     if (!authHeader) {
-      return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
+      return Response.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
+      );
     }
 
     /* user profile */
     const profile = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}/users/profile/view`,
-      { headers: { Authorization: authHeader } }
+      { headers: { Authorization: authHeader } },
     );
 
     const user = profile.data.user;
 
     if (!user.googleAccessToken) {
-      return Response.json({ success: false, error: "Google not connected" }, { status: 401 });
+      return Response.json(
+        { success: false, error: "Google not connected" },
+        { status: 401 },
+      );
     }
 
     console.log("User:", user.email);
@@ -50,7 +57,7 @@ export async function GET(req: Request) {
     /* oauth */
     const oauth2 = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET
+      process.env.GOOGLE_CLIENT_SECRET,
     );
 
     oauth2.setCredentials({
@@ -61,7 +68,10 @@ export async function GET(req: Request) {
     const { token: accessToken } = await oauth2.getAccessToken();
 
     if (!accessToken) {
-      return Response.json({ success: false, error: "Token refresh failed" }, { status: 401 });
+      return Response.json(
+        { success: false, error: "Token refresh failed" },
+        { status: 401 },
+      );
     }
 
     console.log("Token OK");
@@ -92,7 +102,7 @@ export async function GET(req: Request) {
 
     const qp = new URLSearchParams();
 
-    metrics.forEach(m => qp.append("dailyMetrics", m));
+    metrics.forEach((m) => qp.append("dailyMetrics", m));
 
     qp.set("dailyRange.start_date.year", String(startDate.getFullYear()));
     qp.set("dailyRange.start_date.month", String(startDate.getMonth() + 1));
@@ -102,8 +112,7 @@ export async function GET(req: Request) {
     qp.set("dailyRange.end_date.month", String(endDate.getMonth() + 1));
     qp.set("dailyRange.end_date.day", String(endDate.getDate()));
 
-    const perfEndpoint =
-      `${PERF_BASE}/v1/locations/${locationId}:fetchMultiDailyMetricsTimeSeries?${qp}`;
+    const perfEndpoint = `${PERF_BASE}/v1/locations/${locationId}:fetchMultiDailyMetricsTimeSeries?${qp}`;
 
     console.log("Perf endpoint:", perfEndpoint);
 
@@ -121,7 +130,7 @@ export async function GET(req: Request) {
 
     console.log(
       "Metric series count:",
-      perfData.multiDailyMetricTimeSeries?.length
+      perfData.multiDailyMetricTimeSeries?.length,
     );
 
     /* parse metrics safely */
@@ -129,7 +138,6 @@ export async function GET(req: Request) {
     const series: Record<string, { date: string; value: number }[]> = {};
 
     for (const metricObj of perfData.multiDailyMetricTimeSeries ?? []) {
-
       const metricName =
         metricObj.dailyMetric ||
         metricObj.dailyMetricTimeSeries?.[0]?.dailyMetric ||
@@ -159,16 +167,15 @@ export async function GET(req: Request) {
 
     const dateSet = new Set<string>();
 
-    Object.values(series).forEach(arr =>
-      arr.forEach(d => dateSet.add(d.date))
+    Object.values(series).forEach((arr) =>
+      arr.forEach((d) => dateSet.add(d.date)),
     );
 
     const impressionsByDay = Array.from(dateSet)
       .sort()
-      .map(date => {
-
+      .map((date) => {
         const g = (k: string) =>
-          series[k]?.find(d => d.date === date)?.value ?? 0;
+          series[k]?.find((d) => d.date === date)?.value ?? 0;
 
         return {
           date,
@@ -186,19 +193,17 @@ export async function GET(req: Request) {
 
     const actionsByDay = Array.from(dateSet)
       .sort()
-      .map(date => ({
-
+      .map((date) => ({
         date,
 
-        calls:
-          series["CALL_CLICKS"]?.find(d => d.date === date)?.value ?? 0,
+        calls: series["CALL_CLICKS"]?.find((d) => d.date === date)?.value ?? 0,
 
         website:
-          series["WEBSITE_CLICKS"]?.find(d => d.date === date)?.value ?? 0,
+          series["WEBSITE_CLICKS"]?.find((d) => d.date === date)?.value ?? 0,
 
         directions:
-          series["BUSINESS_DIRECTION_REQUESTS"]
-            ?.find(d => d.date === date)?.value ?? 0,
+          series["BUSINESS_DIRECTION_REQUESTS"]?.find((d) => d.date === date)
+            ?.value ?? 0,
       }));
 
     /* reviews */
@@ -217,10 +222,9 @@ export async function GET(req: Request) {
     let reviewsData: any = { reviews: [], totalReviewCount: 0 };
 
     if (accountId) {
-
       const rRes = await fetch(
         `https://mybusiness.googleapis.com/v4/${accountId}/locations/${locationId}/reviews?pageSize=50`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
+        { headers: { Authorization: `Bearer ${accessToken}` } },
       );
 
       reviewsData = await rRes.json();
@@ -228,29 +232,65 @@ export async function GET(req: Request) {
       console.log("Reviews:", reviewsData.reviews?.length);
     }
 
-    const ratingMap: Record<string, number> =
-      { ONE:1, TWO:2, THREE:3, FOUR:4, FIVE:5 };
+    const ratingMap: Record<string, number> = {
+      ONE: 1,
+      TWO: 2,
+      THREE: 3,
+      FOUR: 4,
+      FIVE: 5,
+    };
 
     const reviews = reviewsData.reviews ?? [];
 
-    const avgRating =
-      reviews.length
-        ? reviews.reduce((a: number, r: any) =>
-            a + (ratingMap[r.starRating] ?? 0), 0) / reviews.length
-        : 0;
+    const avgRating = reviews.length
+      ? reviews.reduce(
+          (a: number, r: any) => a + (ratingMap[r.starRating] ?? 0),
+          0,
+        ) / reviews.length
+      : 0;
 
-    const repliedCount =
-      reviews.filter((r: any) => r.reviewReply).length;
+    const repliedCount = reviews.filter((r: any) => r.reviewReply).length;
 
-    const replyRate =
-      reviews.length
-        ? Math.round((repliedCount / reviews.length) * 100)
-        : 0;
+    const replyRate = reviews.length
+      ? Math.round((repliedCount / reviews.length) * 100)
+      : 0;
+
+    /* posts */
+
+    let totalPosts = 0;
+    let livePosts = 0;
+    let eventPosts = 0;
+    let offerPosts = 0;
+    let updatePosts = 0;
+
+    if (accountId) {
+      const pRes = await fetch(
+        `https://mybusiness.googleapis.com/v4/${accountId}/locations/${locationId}/localPosts?pageSize=100`,
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+
+      const postsData = await pRes.json();
+
+      const posts = postsData.localPosts ?? [];
+
+      totalPosts = posts.length;
+
+      for (const post of posts) {
+        if (post.state === "LIVE") livePosts++;
+
+        if (post.topicType === "EVENT") eventPosts++;
+
+        if (post.topicType === "OFFER") offerPosts++;
+
+        if (post.topicType === "STANDARD") updatePosts++;
+      }
+    }
 
     /* response */
 
-    return Response.json({
+    const totalReviews = reviewsData.totalReviewCount ?? reviews.length;
 
+    return Response.json({
       success: true,
 
       range,
@@ -258,49 +298,80 @@ export async function GET(req: Request) {
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
 
+      /* existing UI summary */
       summary: {
         totalImpressions,
+
+        totalCalls: sum(series["CALL_CLICKS"]),
+
+        totalWebsite: sum(series["WEBSITE_CLICKS"]),
+
+        totalDirections: sum(series["BUSINESS_DIRECTION_REQUESTS"]),
+
+        totalConversations: sum(series["BUSINESS_CONVERSATIONS"]),
+
+        totalReviews,
+
+        avgRating: parseFloat(avgRating.toFixed(1)),
+
+        replyRate,
+
+        totalPosts, // FIXED (was 0)
+      },
+
+      /* NEW: Redux friendly stats object */
+      stats: {
+        totalReviews,
+        repliedReviews: repliedCount,
+        unrepliedReviews: totalReviews - repliedCount,
+
+        avgRating: parseFloat(avgRating.toFixed(1)),
+
+        totalPosts,
+        livePosts,
+        eventPosts,
+        offerPosts,
+        updatePosts,
+
+        totalImpressions,
+
         totalCalls: sum(series["CALL_CLICKS"]),
         totalWebsite: sum(series["WEBSITE_CLICKS"]),
         totalDirections: sum(series["BUSINESS_DIRECTION_REQUESTS"]),
-        totalConversations: sum(series["BUSINESS_CONVERSATIONS"]),
-        totalReviews: reviewsData.totalReviewCount ?? reviews.length,
-        avgRating: parseFloat(avgRating.toFixed(1)),
-        replyRate,
-        totalPosts: 0,
       },
 
       charts: {
         impressionsByDay,
         actionsByDay,
+
         impressionBreakdown: {
           desktopMaps: sum(series["BUSINESS_IMPRESSIONS_DESKTOP_MAPS"]),
           desktopSearch: sum(series["BUSINESS_IMPRESSIONS_DESKTOP_SEARCH"]),
           mobileMaps: sum(series["BUSINESS_IMPRESSIONS_MOBILE_MAPS"]),
           mobileSearch: sum(series["BUSINESS_IMPRESSIONS_MOBILE_SEARCH"]),
         },
+
         ratingDistribution: {},
+
         callSeries: series["CALL_CLICKS"] ?? [],
         websiteSeries: series["WEBSITE_CLICKS"] ?? [],
         directionSeries: series["BUSINESS_DIRECTION_REQUESTS"] ?? [],
       },
 
-      recentReviews: reviews.slice(0,5).map((r:any)=>({
-        author:r.reviewer?.displayName ?? "Anonymous",
-        rating:ratingMap[r.starRating] ?? 0,
-        comment:r.comment ?? "",
-        date:r.createTime,
-        replied:!!r.reviewReply
-      }))
+      recentReviews: reviews.slice(0, 5).map((r: any) => ({
+        author: r.reviewer?.displayName ?? "Anonymous",
+        rating: ratingMap[r.starRating] ?? 0,
+        comment: r.comment ?? "",
+        date: r.createTime,
+        replied: !!r.reviewReply,
+      })),
     });
-
-  } catch (err:any) {
-
+  } catch (err: any) {
     console.error("ANALYTICS ERROR:", err);
 
     return Response.json(
-      { success:false, error:err.message ?? "Analytics failed" },
-      { status:500 }
+      { success: false, error: err.message ?? "Analytics failed" },
+      { status: 500 },
     );
   }
 }

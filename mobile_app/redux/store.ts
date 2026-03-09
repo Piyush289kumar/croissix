@@ -2,8 +2,8 @@
 
 import { configureStore } from "@reduxjs/toolkit";
 import appConfigReducer from "@/redux/slices/appConfigSlice";
-``;
 import userReducer from "@/redux/slices/userSlice";
+import googleReducer from "@/redux/slices/googleSlice";
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +11,7 @@ export const store = configureStore({
     appConfig: appConfigReducer,
     // User State
     user: userReducer,
+    google: googleReducer,
   },
 });
 
