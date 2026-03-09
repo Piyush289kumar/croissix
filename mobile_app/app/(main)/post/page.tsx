@@ -34,7 +34,8 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import Image from "next/image";
-
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 /* ══════════════════════════════════════════════════════════
    TYPES
 ══════════════════════════════════════════════════════════ */
@@ -419,8 +420,7 @@ function PostCard({
           <Image
             src={post.imageUrl!}
             alt="Error"
-            width={500}
-            height={1200}
+            fill
             className="object-cover"
             unoptimized
           />
@@ -656,6 +656,8 @@ export default function GooglePostsPage() {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
+  const googleStats = useSelector((state: RootState) => state.google.stats);
+
   /* ui */
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterType>("ALL");
@@ -734,18 +736,33 @@ export default function GooglePostsPage() {
   });
 
   /* ── stats ── */
-  const total = posts.length;
-  const liveCount = posts.filter((p) => p.state === "LIVE").length;
-  const evtCount = posts.filter((p) => p.topicType === "EVENT").length;
-  const ofrCount = posts.filter((p) => p.topicType === "OFFER").length;
+
+  const total = googleStats?.totalPosts ?? posts.length;
+
+  const liveCount =
+    googleStats?.livePosts ?? posts.filter((p) => p.state === "LIVE").length;
+
+  const evtCount =
+    googleStats?.eventPosts ??
+    posts.filter((p) => p.topicType === "EVENT").length;
+
+  const ofrCount =
+    googleStats?.offerPosts ??
+    posts.filter((p) => p.topicType === "OFFER").length;
+
+  const updCount =
+    googleStats?.updatePosts ??
+    posts.filter((p) => p.topicType === "STANDARD").length;
+
+  const rejectedCount = posts.filter((p) => p.state === "REJECTED").length;
 
   const FILTERS: { id: FilterType; label: string }[] = [
-    { id: "ALL", label: "All" },
+    { id: "ALL", label: `All (${total})` },
     { id: "LIVE", label: `Live (${liveCount})` },
-    { id: "STANDARD", label: "Updates" },
-    { id: "EVENT", label: "Events" },
-    { id: "OFFER", label: "Offers" },
-    { id: "REJECTED", label: "Rejected" },
+    { id: "STANDARD", label: `Updates (${updCount})` },
+    { id: "EVENT", label: `Events (${evtCount})` },
+    { id: "OFFER", label: `Offers (${ofrCount})` },
+    { id: "REJECTED", label: `Rejected (${rejectedCount})` },
   ];
 
   const isInitial = userLoading || (isLoading && posts.length === 0);
