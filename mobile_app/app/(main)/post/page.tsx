@@ -865,6 +865,7 @@ export default function GooglePostPage() {
     }
     return true;
   };
+
   /* ── submit ── */
   const handleSubmit = async () => {
     setError("");
@@ -875,7 +876,6 @@ export default function GooglePostPage() {
 
     try {
       const token = localStorage.getItem("accessToken");
-
       if (!token) throw new Error("User not authenticated");
 
       /* ---------------- BUILD PAYLOAD ---------------- */
@@ -894,27 +894,51 @@ export default function GooglePostPage() {
       /* CTA */
 
       if (cta !== "NONE") {
-        payload.callToAction = {
-          actionType: cta,
-        };
+        payload.callToAction = { actionType: cta };
 
-        if (ctaUrl) payload.callToAction.url = ctaUrl;
+        if (cta !== "CALL" && ctaUrl) {
+          payload.callToAction.url = ctaUrl;
+        }
       }
 
-      /* IMAGES (REMOVE BASE64 — GOOGLE DOESN'T ALLOW) */
+      /* ---------------- IMAGE UPLOAD ---------------- */
 
-      const validImages = images.filter(
-        (img) => img.startsWith("http"), // must be public URL
-      );
+      let uploadedUrls: string[] = [];
 
-      if (validImages.length) {
-        payload.media = validImages.map((img) => ({
+      if (images.length) {
+        setPostState("uploading");
+
+        for (const base64 of images) {
+          // convert base64 → file
+          const res = await fetch(base64);
+          const blob = await res.blob();
+
+          const formData = new FormData();
+          formData.append("file", blob, "image.jpg");
+
+          const uploadRes = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const uploadData = await uploadRes.json();
+
+          if (!uploadData.secure_url) throw new Error("Image upload failed");
+
+          uploadedUrls.push(uploadData.secure_url);
+        }
+      }
+
+      /* ---------------- ADD MEDIA ---------------- */
+
+      if (uploadedUrls.length) {
+        payload.media = uploadedUrls.map((url) => ({
           mediaFormat: "PHOTO",
-          sourceUrl: img,
+          sourceUrl: url,
         }));
       }
 
-      /* EVENT POST */
+      /* ---------------- EVENT ---------------- */
 
       if (postType === "EVENT") {
         payload.event = {
@@ -942,7 +966,7 @@ export default function GooglePostPage() {
         };
       }
 
-      /* OFFER POST */
+      /* ---------------- OFFER ---------------- */
 
       if (postType === "OFFER") {
         payload.offer = {
@@ -956,9 +980,9 @@ export default function GooglePostPage() {
         };
       }
 
-      console.log("POST PAYLOAD:", payload);
+      console.log("FINAL PAYLOAD:", payload);
 
-      /* ---------------- API CALL ---------------- */
+      /* ---------------- POST TO GOOGLE ---------------- */
 
       const res = await fetch("/api/google/posts", {
         method: "POST",
@@ -974,7 +998,7 @@ export default function GooglePostPage() {
 
       const json = await res.json();
 
-      console.log("API RESPONSE:", json);
+      console.log("POST RESPONSE:", json);
 
       if (!json.success) {
         throw new Error(json.error || "Post failed");
