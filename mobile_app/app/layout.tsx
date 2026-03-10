@@ -41,7 +41,7 @@ export default function RootLayout({
         <ReduxProvider>
           <QueryProvider>
             <Providers
-              themeProps={{ attribute: "class", defaultTheme: "dark" }}
+              themeProps={{ attribute: "class", defaultTheme: "light" }}
             >
               <UserLoader />
               {children}
