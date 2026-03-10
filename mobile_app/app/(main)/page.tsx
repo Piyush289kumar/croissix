@@ -1828,7 +1828,7 @@ export default function HomePage() {
         </div>
 
         <div className="pt-4 pb-4 flex items-center justify-center">
-          <CibilScore score={300} change={12} min={0} max={1000} />
+          <CibilScore score={900} change={12} min={0} max={1000} />
         </div>
 
         {isLoading && <HomeSkeleton isDark={isDark} />}

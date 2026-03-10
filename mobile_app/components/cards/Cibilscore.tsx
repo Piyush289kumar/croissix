@@ -25,8 +25,8 @@ function getMeta(score: number) {
 }
 
 /* ── arc geometry ─────────────────────────────────────────── */
-const ARC_START = 216;
-const ARC_SWEEP = 252;
+const ARC_START = 252;
+const ARC_SWEEP = 217;
 
 function polar(cx: number, cy: number, r: number, deg: number) {
   const rad = ((deg - 90) * Math.PI) / 180;
@@ -240,8 +240,6 @@ export default function CibilScore({
           </div>
           <div
             style={{
-              fontFamily:
-                "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
               fontSize: 14,
               fontWeight: 700,
               letterSpacing: "-0.03em",
@@ -249,7 +247,7 @@ export default function CibilScore({
               lineHeight: 1.2,
             }}
           >
-            GMB Report
+            Google Profile Report
           </div>
         </div>
         {/* Score badge */}
@@ -310,13 +308,13 @@ export default function CibilScore({
           {filled}
 
           {/* tick marks */}
-          {ticks}
+          {/* {ticks} */}
 
           {/* glow under tip */}
           <circle
             cx={tip.x}
             cy={tip.y}
-            r={SW / 2 + 8}
+            r={SW / 2 + 16}
             fill={activeClr}
             opacity="0.2"
           />
@@ -333,22 +331,6 @@ export default function CibilScore({
           {/* tip circle inner dot */}
           <circle cx={tip.x} cy={tip.y} r={4.5} fill={activeClr} />
 
-          {/* min/max text */}
-          {/* {[{ v: min, anchor: "end",   offset: -8 },
-            { v: max, anchor: "start", offset:  8 }].map(({ v, anchor, offset }) => {
-            const p   = (v - min) / (max - min);
-            const ang = ARC_START + p * ARC_SWEEP;
-            const pt  = polar(cx, cy, r + SW / 2 + 18, ang);
-            return (
-              <text key={v} x={pt.x + offset} y={pt.y + 4}
-                textAnchor={anchor as any}
-                fill={v === min ? "#ef4444" : "#22c55e"}
-                fontSize="12" fontWeight="700"
-                fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">
-                {v}
-              </text>
-            );
-          })} */}
         </svg>
 
         {/* ── Center overlay ── */}
@@ -427,6 +409,7 @@ export default function CibilScore({
             out of {max}
           </span>
         </div>
+        
       </div>
       {/* ── Band labels row ── */}
       <div
