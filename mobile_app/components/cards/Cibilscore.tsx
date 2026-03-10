@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
+import ImproveScoreButton from "../buttons/ImproveScoreButton";
 
 interface CibilScoreProps {
   score?: number;
@@ -284,7 +285,6 @@ export default function CibilScore({
           </span>
         </div>
       </div>
-
       {/* ── Gauge ── */}
       <div
         style={{
@@ -428,7 +428,6 @@ export default function CibilScore({
           </span>
         </div>
       </div>
-
       {/* ── Band labels row ── */}
       <div
         style={{
@@ -479,10 +478,8 @@ export default function CibilScore({
           );
         })}
       </div>
-
       {/* ── Divider ── */}
       <div style={{ height: 1, background: divider, marginBottom: 16 }} />
-
       {/* ── Stats row ── */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         {[
@@ -526,59 +523,8 @@ export default function CibilScore({
           </div>
         ))}
       </div>
-
-      {/* ── Download button ── */}
-      <button
-        style={{
-          width: "100%",
-          height: 50,
-          borderRadius: 16,
-          background: "linear-gradient(135deg,#1d4ed8 0%,#3b82f6 100%)",
-          boxShadow: "0 6px 24px rgba(37,99,235,0.38)",
-          border: "none",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8,
-          color: "white",
-          fontFamily:
-            "-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif",
-          fontSize: 15,
-          fontWeight: 700,
-          letterSpacing: "-0.015em",
-          transition: "transform .15s, box-shadow .15s",
-        }}
-        onPointerDown={(e) => {
-          e.currentTarget.style.transform = "scale(0.97)";
-          e.currentTarget.style.boxShadow = "0 2px 12px rgba(37,99,235,0.3)";
-        }}
-        onPointerUp={(e) => {
-          e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.boxShadow = "0 6px 24px rgba(37,99,235,0.38)";
-        }}
-        onPointerLeave={(e) => {
-          e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.boxShadow = "0 6px 24px rgba(37,99,235,0.38)";
-        }}
-      >
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M12 4v12M6 12l6 6 6-6"
-            stroke="white"
-            strokeWidth="2.3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M4 20h16"
-            stroke="white"
-            strokeWidth="2.3"
-            strokeLinecap="round"
-          />
-        </svg>
-        Download Full Report
-      </button>
+      {/* ──  Improve Google Score button ── */}
+      <ImproveScoreButton />
     </div>
   );
 }
