@@ -656,6 +656,13 @@ function QuickActionsGrid({
       route: "/reviews/google",
     },
     {
+      label: "Photos",
+      icon: <ImageIcon size={18} />,
+      color: "#06b6d4",
+      bg: "rgba(6,182,212,0.12)",
+      route: "/photos",
+    },
+    {
       label: "Analytics",
       icon: <BarChart2 size={18} />,
       color: "#8b5cf6",
@@ -668,13 +675,6 @@ function QuickActionsGrid({
       color: "#f97316",
       bg: "rgba(249,115,22,0.12)",
       route: "/post",
-    },
-    {
-      label: "Photos",
-      icon: <ImageIcon size={18} />,
-      color: "#06b6d4",
-      bg: "rgba(6,182,212,0.12)",
-      route: "/photos",
     },
   ];
   return (
