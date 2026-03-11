@@ -997,7 +997,10 @@ export default function ProfilePage() {
               >
                 {user?.name ?? "N/A"}
               </span>
-              <span style={{ color: "#3b82f6", cursor: "pointer" }}  onClick={() => router.push("/profile/google-profile/edit")}>
+              <span
+                style={{ color: "#3b82f6", cursor: "pointer" }}
+                onClick={() => router.push("/profile/google-profile/edit")}
+              >
                 {Icon.edit}
               </span>
             </div>
@@ -1053,7 +1056,8 @@ export default function ProfilePage() {
                 Update Google Profile
               </span>
               <span
-                style={{ color: "#3b82f6", cursor: "pointer", marginLeft: 8 }} onClick={() => router.push("/profile/google-profile/edit")}
+                style={{ color: "#3b82f6", cursor: "pointer", marginLeft: 8 }}
+                onClick={() => router.push("/profile/google-profile/edit")}
               >
                 {Icon.edit}
               </span>
@@ -1113,7 +1117,13 @@ export default function ProfilePage() {
               label="Notifications"
               t={t}
             />
-            <Row icon={Icon.privacy} iconBg="#8b5cf6" label="Privacy" t={t} />
+            <Row
+              icon={Icon.privacy}
+              iconBg="#8b5cf6"
+              label="Privacy"
+              t={t}
+              onClick={() => router.push("/privacy")}
+            />
             <Row
               icon={Icon.security}
               iconBg="#2563eb"
@@ -1138,12 +1148,19 @@ export default function ProfilePage() {
           <style>{`@keyframes gmbSlideIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
           <Section t={t}>
-            <Row icon={Icon.help} iconBg="#64748b" label="Help" t={t} />
+            <Row
+              icon={Icon.help}
+              iconBg="#64748b"
+              label="Help"
+              t={t}
+              onClick={() => router.push("/help")}
+            />
             <Row
               icon={Icon.invite}
               iconBg="#10b981"
               label="Invite a Friend"
               t={t}
+              onClick={() => router.push("/invite")}
             />
             <Row
               icon={Icon.theme}
