@@ -997,7 +997,7 @@ export default function ProfilePage() {
               >
                 {user?.name ?? "N/A"}
               </span>
-              <span style={{ color: "#3b82f6", cursor: "pointer" }}>
+              <span style={{ color: "#3b82f6", cursor: "pointer" }}  onClick={() => router.push("/profile/google-profile/edit")}>
                 {Icon.edit}
               </span>
             </div>
