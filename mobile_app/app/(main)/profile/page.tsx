@@ -1034,7 +1034,7 @@ export default function ProfilePage() {
                 fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
               }}
             >
-              About
+              Edit
             </div>
             <div
               style={{
@@ -1050,10 +1050,10 @@ export default function ProfilePage() {
                   fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
                 }}
               >
-                Hey there! I am using WhatsApp 👋
+                Update Google Profile
               </span>
               <span
-                style={{ color: "#3b82f6", cursor: "pointer", marginLeft: 8 }}
+                style={{ color: "#3b82f6", cursor: "pointer", marginLeft: 8 }} onClick={() => router.push("/profile/google-profile/edit")}
               >
                 {Icon.edit}
               </span>
