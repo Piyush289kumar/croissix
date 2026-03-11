@@ -3,9 +3,9 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { loginUser, registerUser } from "../services/auth.api";
+import { loginUser, logoutUser, registerUser } from "../services/auth.api";
 import { useDispatch } from "react-redux";
-import { setUser } from "@/redux/slices/userSlice";
+import { clearUser, setUser } from "@/redux/slices/userSlice";
 
 export const useRegister = () => {
   return useMutation({
@@ -22,11 +22,15 @@ export const useLogin = () => {
     onSuccess: (data) => {
       if (!data?.token) return;
 
-      // 🔥 Clean previous session
+      // clear previous session
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       localStorage.removeItem("lastExternalReferrer");
       localStorage.removeItem("lastExternalReferrerTime");
       localStorage.removeItem("topicsLastReferenceTime");
+
+      // store tokens
+      localStorage.setItem("refreshToken", data.refreshToken);
 
       // store fresh token
       localStorage.setItem("accessToken", data.token);
@@ -35,6 +39,35 @@ export const useLogin = () => {
       if (data.user) {
         dispatch(setUser(data.user));
       }
+    },
+  });
+};
+
+export const useLogout = () => {
+  const dispatch = useDispatch();
+
+  return useMutation({
+    mutationFn: logoutUser,
+
+    onSuccess: () => {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("lastExternalReferrer");
+      localStorage.removeItem("lastExternalReferrerTime");
+      localStorage.removeItem("topicsLastReferenceTime");
+
+      sessionStorage.clear();
+
+      dispatch(clearUser());
+
+      window.location.href = "/login";
+    },
+
+    onError: () => {
+      // fallback cleanup
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = "/login";
     },
   });
 };

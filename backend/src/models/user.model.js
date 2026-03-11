@@ -46,6 +46,10 @@ const userSchema = new mongoose.Schema(
     googleLocationName: {
       type: String,
     },
+
+    refreshToken: {
+      type: String,
+    },
   },
   {
     timestamps: true,

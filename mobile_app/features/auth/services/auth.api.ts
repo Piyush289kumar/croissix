@@ -23,3 +23,8 @@ export const loginUser = async (data: LoginPayload) => {
   const res = await API.post("/auth/login", data);
   return res.data;
 };
+
+export const logoutUser = async () => {
+  const res = await API.post("/auth/logout");
+  return res.data;
+};

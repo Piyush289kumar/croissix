@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slices/userSlice";
 import { clearUser } from "@/redux/slices/userSlice";
 import { useRouter } from "next/navigation";
+import { useLogout } from "@/features/auth/hook/useAuth";
 
 /*
   Dark palette anchored to rgb(13, 20, 33):
@@ -895,40 +896,12 @@ function LocationRow({
 export default function ProfilePage() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-
-  const dispatch = useDispatch();
-  const router = useRouter();
+  const { mutate: logout } = useLogout();
 
   const user = useSelector((state: RootState) => state.user.data);
 
-  const handleLogout = async () => {
-    try {
-      const token = localStorage.getItem("accessToken");
-
-      if (token) {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      }
-
-      // 🔥 clear storage
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("lastExternalReferrer");
-      localStorage.removeItem("lastExternalReferrerTime");
-      localStorage.removeItem("topicsLastReferenceTime");
-
-      sessionStorage.clear();
-
-      // redux reset
-      dispatch(clearUser());
-
-      router.push("/login");
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
+  const handleLogout = () => {
+    logout();
   };
 
   useEffect(() => setMounted(true), []);

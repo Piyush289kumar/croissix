@@ -98,21 +98,33 @@ export const login = async (req, res) => {
       });
     }
 
-    // Generate JWT Token
-    const token = jwt.sign(
+    // Generate JWT Token - Acccess Token
+    const accessToken = jwt.sign(
       {
         id: user._id,
         email: user.email,
         provider: user.provider,
       },
       process.env.JWT_SECRET,
+      { expiresIn: "15m" },
+    );
+
+    // Generate JWT Token - Refresh Token
+    const refreshToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_REFRESH_SECRET,
       { expiresIn: "7d" },
     );
+
+    // store refresh token
+    user.refreshToken = refreshToken;
+    await user.save();
 
     return res.status(200).json({
       status: "success",
       message: "Login successful.",
-      token,
+      accessToken,
+      refreshToken,
       user: {
         id: user._id,
         name: user.name,
@@ -194,11 +206,77 @@ export const linkGoogleAccount = async (req, res) => {
 };
 
 // -------------------------
+// Refresh Token (JWT)
+// -------------------------
+// -------------------------
+// Refresh Token (JWT)
+// -------------------------
+export const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken: incomingToken } = req.body;
+
+    if (!incomingToken) {
+      return res.status(401).json({
+        status: "error",
+        message: "Refresh token required",
+      });
+    }
+
+    // verify refresh token
+    const decoded = jwt.verify(incomingToken, process.env.JWT_REFRESH_SECRET);
+
+    // fetch user
+    const user = await User.findById(decoded.id)
+      .select("email provider refreshToken")
+      .lean();
+
+    if (!user || user.refreshToken !== incomingToken) {
+      return res.status(403).json({
+        status: "error",
+        message: "Invalid refresh token",
+      });
+    }
+
+    // generate new access token
+    const newAccessToken = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+        provider: user.provider,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" },
+    );
+
+    return res.status(200).json({
+      status: "success",
+      accessToken: newAccessToken,
+    });
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(403).json({
+        status: "error",
+        message: "Refresh token expired",
+      });
+    }
+
+    return res.status(403).json({
+      status: "error",
+      message: "Invalid refresh token",
+    });
+  }
+};
+
+// -------------------------
 // Logout user (JWT) - optimized
 // -------------------------
 export const logout = async (req, res) => {
   try {
-    // If you want, implement token blacklist in DB/Redis for server-side invalidation
+    const user = await User.findById(req.user.id);
+    if (user) {
+      user.refreshToken = null;
+      await user.save();
+    }
     return res.status(200).json({
       message:
         "Logout successful. Please remove the token from client storage.",
