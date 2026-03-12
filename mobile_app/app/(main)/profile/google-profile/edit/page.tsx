@@ -3801,7 +3801,6 @@ export default function GoogleProfileEditPage() {
                 {userLoading
                   ? "Loading…"
                   : LOCATION_NAME || "Google Business Profile"}{" "}
-                · API v1
               </p>
             </div>
           </div>
