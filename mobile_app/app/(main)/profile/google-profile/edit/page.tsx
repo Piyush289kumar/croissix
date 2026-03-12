@@ -572,8 +572,8 @@ function LocationTab({ draft, upd, dark }: { draft:LocationDraft; upd:(p:Partial
   const [bizType, setBizType] = useState(draft.serviceArea.businessType);
   const [areas,   setAreas]   = useState(draft.serviceArea.places?.placeInfos ?? []);
 
-  useEffect(()=>{ setAddr(draft.storefrontAddress); },               [draft.storefrontAddress]);
-  useEffect(()=>{ setBizType(draft.serviceArea.businessType); },     [draft.serviceArea.businessType]);
+  useEffect(()=>{ setAddr(draft.storefrontAddress); },                   [draft.storefrontAddress]);
+  useEffect(()=>{ setBizType(draft.serviceArea.businessType); },         [draft.serviceArea.businessType]);
   useEffect(()=>{ setAreas(draft.serviceArea.places?.placeInfos??[]); }, [draft.serviceArea.places]);
 
   const commit = () => upd(
@@ -582,62 +582,141 @@ function LocationTab({ draft, upd, dark }: { draft:LocationDraft; upd:(p:Partial
   );
   const s = tok(dark);
 
+  /* pre-compute border values to avoid nested ternaries in template literals */
+  const mapWrapBorder   = dark ? "rgba(255,255,255,0.07)" : "rgba(203,213,225,0.5)";
+  const pillBorder      = dark ? "rgba(255,255,255,0.1)"  : "rgba(0,0,0,0.08)";
+  const pillBg          = dark ? "rgba(13,26,46,0.88)"    : "rgba(255,255,255,0.92)";
+  const pillColor       = dark ? "#e2e8f0"                : "#1e293b";
+  const fallbackBorder  = dark ? "rgba(59,130,246,0.1)"   : "rgba(147,197,253,0.25)";
+  const fallbackBg      = dark ? "rgba(59,130,246,0.04)"  : "rgba(59,130,246,0.03)";
+
   return (
     <motion.div variants={stag} initial="hidden" animate="show" onBlur={commit}>
+
+      {/* ── Storefront Address ── */}
       <Card title="Storefront Address" icon={<MapPin size={13}/>} dark={dark}>
         <FW label="Address Lines" required dark={dark} hint="Street address. Line 2 for suite/floor.">
           {addr.addressLines.map((l,i)=>(
             <div key={i} style={{ marginBottom:7 }}>
-              <TI value={l} onChange={v=>setAddr(a=>({ ...a, addressLines:a.addressLines.map((x,j)=>j===i?v:x) }))}
-                dark={dark} placeholder={i===0?"Street address":"Line 2 (optional)"} />
+              <TI
+                value={l}
+                onChange={v=>setAddr(a=>({ ...a, addressLines:a.addressLines.map((x,j)=>j===i?v:x) }))}
+                dark={dark}
+                placeholder={i===0?"Street address":"Line 2 (optional)"}
+              />
             </div>
           ))}
         </FW>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:9 }}>
-          <FW label="City" required dark={dark}><TI value={addr.locality} onChange={v=>setAddr(a=>({...a,locality:v}))} dark={dark} placeholder="City" /></FW>
-          <FW label="PIN Code" required dark={dark}><TI value={addr.postalCode} onChange={v=>setAddr(a=>({...a,postalCode:v}))} dark={dark} placeholder="000000" /></FW>
+          <FW label="City" required dark={dark}>
+            <TI value={addr.locality} onChange={v=>setAddr(a=>({...a,locality:v}))} dark={dark} placeholder="City" />
+          </FW>
+          <FW label="PIN Code" required dark={dark}>
+            <TI value={addr.postalCode} onChange={v=>setAddr(a=>({...a,postalCode:v}))} dark={dark} placeholder="000000" />
+          </FW>
         </div>
-        <FW label="State" required dark={dark}><TI value={addr.administrativeArea} onChange={v=>setAddr(a=>({...a,administrativeArea:v}))} dark={dark} /></FW>
+        <FW label="State" required dark={dark}>
+          <TI value={addr.administrativeArea} onChange={v=>setAddr(a=>({...a,administrativeArea:v}))} dark={dark} />
+        </FW>
         <FW label="Country Code" required dark={dark} hint="ISO 3166-1 alpha-2 (e.g. IN, US, GB).">
           <TI value={addr.regionCode} onChange={v=>setAddr(a=>({...a,regionCode:v.toUpperCase()}))} dark={dark} placeholder="IN" />
         </FW>
       </Card>
 
+      {/* ── GPS Coordinates ── */}
       <Card title="GPS Coordinates" icon={<Navigation size={13}/>} dark={dark} badge="Read-only">
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:9 }}>
-          <FW label="Latitude" dark={dark}><TI value={draft.latlng.latitude.toString()} dark={dark} readOnly /></FW>
+          <FW label="Latitude"  dark={dark}><TI value={draft.latlng.latitude.toString()}  dark={dark} readOnly /></FW>
           <FW label="Longitude" dark={dark}><TI value={draft.latlng.longitude.toString()} dark={dark} readOnly /></FW>
         </div>
-        <div style={{ borderRadius:12, height:70, background:dark?"rgba(59,130,246,0.04)":"rgba(59,130,246,0.03)", border:`1.5px solid ${dark?"rgba(59,130,246,0.1)":"rgba(147,197,253,0.25)"}`, display:"flex", alignItems:"center", justifyContent:"center", gap:8, marginTop:6 }}>
-          <MapPin size={14} style={{ color:"#3b82f6", opacity:0.4 }} />
-          <span style={{ fontSize:11.5, color:dark?"#334155":"#94a3b8", fontWeight:600 }}>{addr.locality}, {addr.administrativeArea} · {addr.regionCode}</span>
-        </div>
-        <p style={{ ...s.muted, marginTop:5, fontSize:10 }}>Coordinates are managed by Google. Use Maps to reposition the pin.</p>
+
+        {draft.latlng.latitude !== 0 && draft.latlng.longitude !== 0 ? (
+          <div style={{ position:"relative", borderRadius:14, overflow:"hidden", marginTop:8, border:`1.5px solid ${mapWrapBorder}` }}>
+
+            <iframe
+              title="Business Location"
+              width="100%"
+              height="180"
+              style={{ display:"block", border:"none", filter:dark?"invert(0.88) hue-rotate(180deg) saturate(0.7) brightness(0.85)":"none" }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              src={`https://maps.google.com/maps?q=${draft.latlng.latitude},${draft.latlng.longitude}&z=15&output=embed`}
+            />
+
+            {/* Address pill */}
+            <div style={{ position:"absolute", bottom:10, left:"50%", transform:"translateX(-50%)", display:"flex", alignItems:"center", gap:6, padding:"5px 11px", borderRadius:99, background:pillBg, backdropFilter:"blur(8px)", border:`1px solid ${pillBorder}`, boxShadow:"0 2px 12px rgba(0,0,0,0.18)", whiteSpace:"nowrap" }}>
+              <MapPin size={11} style={{ color:"#ef4444", flexShrink:0 }} />
+              <span style={{ fontSize:11, fontWeight:700, color:pillColor }}>
+                {addr.locality}, {addr.administrativeArea}
+              </span>
+            </div>
+
+            {/* Open in Maps button */}
+            <a
+              href={`https://maps.google.com/?q=${draft.latlng.latitude},${draft.latlng.longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ position:"absolute", top:8, right:8, display:"flex", alignItems:"center", gap:4, padding:"4px 9px", borderRadius:8, background:pillBg, backdropFilter:"blur(8px)", border:`1px solid ${pillBorder}`, fontSize:10.5, fontWeight:700, color:"#3b82f6", textDecoration:"none", boxShadow:"0 2px 8px rgba(0,0,0,0.15)" }}
+            >
+              <ExternalLink size={10}/> Maps
+            </a>
+
+          </div>
+        ) : (
+          <div style={{ borderRadius:12, height:70, background:fallbackBg, border:`1.5px solid ${fallbackBorder}`, display:"flex", alignItems:"center", justifyContent:"center", gap:8, marginTop:6 }}>
+            <MapPin size={14} style={{ color:"#3b82f6", opacity:0.4 }} />
+            <span style={{ fontSize:11.5, color:dark?"#334155":"#94a3b8", fontWeight:600 }}>Loading coordinates…</span>
+          </div>
+        )}
+
+        <p style={{ ...s.muted, marginTop:6, fontSize:10 }}>
+          Coordinates are managed by Google. Use Maps to reposition the pin.
+        </p>
       </Card>
 
+      {/* ── Service Area ── */}
       <Card title="Service Area" icon={<Globe size={13}/>} dark={dark}>
         <FW label="Business Type" required dark={dark} hint="CUSTOMER_LOCATION_ONLY hides your storefront address.">
-          {([{v:"CUSTOMER_AND_BUSINESS_LOCATION",l:"Physical storefront + service area"},{v:"CUSTOMER_LOCATION_ONLY",l:"Service-area only (no storefront)"}] as const).map(opt=>(
-            <motion.button key={opt.v} whileTap={{ scale:0.99 }} onClick={()=>setBizType(opt.v)}
+          {([
+            { v:"CUSTOMER_AND_BUSINESS_LOCATION", l:"Physical storefront + service area" },
+            { v:"CUSTOMER_LOCATION_ONLY",         l:"Service-area only (no storefront)"  },
+          ] as const).map(opt=>(
+            <motion.button
+              key={opt.v}
+              whileTap={{ scale:0.99 }}
+              onClick={()=>setBizType(opt.v)}
               style={{ display:"flex", alignItems:"center", gap:9, width:"100%", padding:"9px 12px", marginBottom:7, borderRadius:12, border:"2px solid", cursor:"pointer", textAlign:"left",
-                borderColor:bizType===opt.v?"#3b82f6":dark?"rgba(255,255,255,0.06)":"rgba(203,213,225,0.5)",
-                background:bizType===opt.v?dark?"rgba(37,99,235,0.08)":"rgba(219,234,254,0.35)":"transparent" }}>
-              <div style={{ width:14, height:14, borderRadius:"50%", flexShrink:0, border:`2px solid ${bizType===opt.v?"#3b82f6":dark?"#334155":"#cbd5e1"}`, background:bizType===opt.v?"#3b82f6":"transparent", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                borderColor: bizType===opt.v ? "#3b82f6" : dark ? "rgba(255,255,255,0.06)" : "rgba(203,213,225,0.5)",
+                background:  bizType===opt.v ? (dark ? "rgba(37,99,235,0.08)" : "rgba(219,234,254,0.35)") : "transparent" }}
+            >
+              <div style={{ width:14, height:14, borderRadius:"50%", flexShrink:0,
+                border:`2px solid ${bizType===opt.v ? "#3b82f6" : dark ? "#334155" : "#cbd5e1"}`,
+                background: bizType===opt.v ? "#3b82f6" : "transparent",
+                display:"flex", alignItems:"center", justifyContent:"center" }}>
                 {bizType===opt.v && <div style={{ width:5, height:5, borderRadius:"50%", background:"#fff" }} />}
               </div>
-              <span style={{ fontSize:12, fontWeight:700, color:bizType===opt.v?"#3b82f6":dark?"#94a3b8":"#64748b" }}>{opt.l}</span>
+              <span style={{ fontSize:12, fontWeight:700, color: bizType===opt.v ? "#3b82f6" : dark ? "#94a3b8" : "#64748b" }}>
+                {opt.l}
+              </span>
             </motion.button>
           ))}
         </FW>
+
         <FW label="Service Area Places" dark={dark} hint="Cities or regions you serve.">
           <div style={{ display:"flex", flexDirection:"column", gap:7 }}>
             {areas.map((a,i)=>(
               <div key={i} style={{ display:"flex", gap:7, alignItems:"center" }}>
-                <div style={{ flex:1, padding:"9px 12px", borderRadius:11, fontSize:12, fontWeight:600, background:dark?"rgba(255,255,255,0.04)":"#f8fafc", border:`1.5px solid ${dark?"rgba(255,255,255,0.06)":"rgba(203,213,225,0.5)"}`, color:dark?"#94a3b8":"#64748b" }}>
+                <div style={{ flex:1, padding:"9px 12px", borderRadius:11, fontSize:12, fontWeight:600,
+                  background: dark ? "rgba(255,255,255,0.04)" : "#f8fafc",
+                  border:`1.5px solid ${dark?"rgba(255,255,255,0.06)":"rgba(203,213,225,0.5)"}`,
+                  color: dark ? "#94a3b8" : "#64748b" }}>
                   {a.name}
                 </div>
-                <motion.button whileTap={{ scale:0.92 }} onClick={()=>setAreas(as=>as.filter((_,j)=>j!==i))}
-                  style={{ padding:"0 11px", height:38, borderRadius:11, border:"none", cursor:"pointer", background:dark?"rgba(239,68,68,0.1)":"rgba(254,226,226,0.6)", color:"#ef4444" }}>
+                <motion.button
+                  whileTap={{ scale:0.92 }}
+                  onClick={()=>setAreas(as=>as.filter((_,j)=>j!==i))}
+                  style={{ padding:"0 11px", height:38, borderRadius:11, border:"none", cursor:"pointer",
+                    background: dark ? "rgba(239,68,68,0.1)" : "rgba(254,226,226,0.6)", color:"#ef4444" }}>
                   <X size={13}/>
                 </motion.button>
               </div>
@@ -646,6 +725,7 @@ function LocationTab({ draft, upd, dark }: { draft:LocationDraft; upd:(p:Partial
           </div>
         </FW>
       </Card>
+
     </motion.div>
   );
 }
