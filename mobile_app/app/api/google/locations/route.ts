@@ -1,6 +1,6 @@
 // mobile_app\app\api\google\locations\route.ts
 
-import { google } from "googleapis";
+import { google, mybusinessbusinessinformation_v1 } from "googleapis";
 import axios from "axios";
 
 export async function GET(req: Request) {
@@ -46,19 +46,33 @@ export async function GET(req: Request) {
   const accounts = await accountService.accounts.list({});
   const accountList = accounts.data.accounts || [];
 
+  console.log("accountList", accountList);
+
   let allLocations: any[] = [];
 
   for (const acc of accountList) {
-    const locations = await infoService.accounts.locations.list({
-      parent: acc.name!,
-      readMask:
-        "name,title,storeCode,phoneNumbers,websiteUri,storefrontAddress,openInfo",
-    });
+    let pageToken: string | undefined = undefined;
 
-    if (locations.data.locations) {
-      allLocations = [...allLocations, ...locations.data.locations];
-    }
+    do {
+      const res = await infoService.accounts.locations.list({
+        parent: acc.name!,
+        readMask:
+          "name,title,storeCode,phoneNumbers,websiteUri,storefrontAddress,openInfo",
+        pageSize: 100,
+        pageToken,
+      });
+
+      const data = res.data;
+
+      if (data?.locations) {
+        allLocations = [...allLocations, ...data.locations];
+      }
+
+      pageToken = data?.nextPageToken || undefined;
+    } while (pageToken);
   }
+
+  console.log(allLocations);
 
   return Response.json({ locations: allLocations });
 }
