@@ -1128,6 +1128,13 @@ export default function ProfilePage() {
               t={t}
               onClick={() => router.push("/privacy")}
             />
+             <Row
+              icon={Icon.privacy}
+              iconBg="#8b5cf6"
+              label="Terms & Conditions"
+              t={t}
+              onClick={() => router.push("/terms_and_conditions")}
+            />
             <Row
               icon={Icon.security}
               iconBg="#2563eb"
