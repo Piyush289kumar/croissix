@@ -609,14 +609,14 @@ function HeroCard({
       <div className="relative p-5">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl bg-white/15 flex items-center justify-center">
-              <GoogleLogo size={14} />
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+              <GoogleLogo size={26} />
             </div>
             <div>
-              <p className="text-white/60 text-[10px] font-semibold uppercase tracking-widest">
+              <p className="text-white text-[12px] font-semibold uppercase tracking-widest">
                 Google Business
               </p>
-              <p className="text-white/40 text-[10px]">Last 30 days</p>
+              <p className="text-white text-[12px]">Last 30 days</p>
             </div>
           </div>
           <motion.div
@@ -625,7 +625,7 @@ function HeroCard({
             transition={{ duration: 2, repeat: Infinity }}
           >
             <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-            <span className="text-green-300 text-[10px] font-bold">Live</span>
+            <span className="text-green-200 text-[10px] font-bold">Live</span>
           </motion.div>
         </div>
         <div className="flex items-end justify-between">
@@ -636,21 +636,21 @@ function HeroCard({
                 className="text-[38px] font-black text-white leading-none"
                 style={{ letterSpacing: "-0.05em" }}
               />
-              <span className="text-white/50 text-[13px] font-medium mb-1">
+              <span className="text-white text-[13px] font-medium mb-1">
                 views
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-[12px] text-white/70">
+              <span className="text-[12px] text-white">
                 <span className="text-green-300 font-bold">{fmt(leads)}</span>{" "}
                 leads
               </span>
-              <span className="text-[12px] text-white/70">
+              <span className="text-[12px] text-white">
                 <span className="text-yellow-300 font-bold">
                   {summary.avgRating}★
                 </span>
               </span>
-              <span className="text-[12px] text-white/70">
+              <span className="text-[12px] text-white">
                 <span className="text-blue-300 font-bold">
                   {summary.totalReviews}
                 </span>{" "}
@@ -702,15 +702,12 @@ function HeroCard({
             viewport={{ once: true }}
             className={`flex flex-col items-center py-3 gap-0.5 ${i < 3 ? "border-r border-white/[0.08]" : ""}`}
           >
-            <span className="text-white/40">{m.icon}</span>
+            <span className="text-white">{m.icon}</span>
             <AnimatedNumber
               value={m.value}
-              className="text-white text-[14px] font-black leading-none"
-              style={{
-                fontFamily: "-apple-system,'SF Pro Display',sans-serif",
-              }}
+              className="text-white text-[14px] font-black leading-none py-1"
             />
-            <span className="text-white/40 text-[9px] font-semibold uppercase tracking-wide">
+            <span className="text-white text-[9px] font-semibold uppercase tracking-wide">
               {m.label}
             </span>
           </motion.div>
@@ -2191,7 +2188,7 @@ export default function HomePage() {
                   isDark={isDark}
                   action={{
                     label: "Full report",
-                    onClick: () => router.push("/analysis/google"),
+                    onClick: () => router.push("/dashboard/competitors"),
                   }}
                 />
                 <HeroCard

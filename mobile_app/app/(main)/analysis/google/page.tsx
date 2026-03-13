@@ -505,7 +505,7 @@ export default function GoogleAnalysisPage() {
 
   const { data: user, isLoading: userLoading } = useUser();
 
-  const [range, setRange] = useState<RangeKey>("30d");
+  const [range, setRange] = useState<RangeKey>("90d");
   const [activeChart, setActiveChart] = useState<"area" | "bar">("area");
   const [showDl, setShowDl] = useState(false);
   const dlRef = useRef<HTMLDivElement>(null);
