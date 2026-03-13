@@ -7,8 +7,8 @@ import User from "../models/user.model.js";
 export const register = async (req, res) => {
   try {
     console.log("📥 Register payload:", req.body);
-    const { name, email, phone, password } = req.body;
-    email = email.trim().toLowerCase();
+    const { name, phone, password } = req.body;
+    let email = req.body.email?.trim().toLowerCase();
 
     if (!name || !email || !phone || !password) {
       return res.status(400).json({
