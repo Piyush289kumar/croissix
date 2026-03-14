@@ -14,7 +14,6 @@ export async function generateReviewReply(
   businessCategory?: string,
   tone?: string,
 ) {
-
   const prompt = `
 You are the owner of a Google Business Profile replying to a customer review.
 

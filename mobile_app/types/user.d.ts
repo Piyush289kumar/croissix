@@ -10,6 +10,8 @@ export interface User {
   avatar?: string;
   googleLocationId?: string;
   googleLocationName: string;
+  googleLocationCategory?: string;
+  businessCategory?: string;
   createdAt: string;
   updatedAt: string;
 }

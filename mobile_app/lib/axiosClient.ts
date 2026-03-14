@@ -34,10 +34,7 @@ API.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry
-    ) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
@@ -45,7 +42,7 @@ API.interceptors.response.use(
 
         const res = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-          { refreshToken }
+          { refreshToken },
         );
 
         const newAccessToken = res.data.accessToken;
@@ -54,18 +51,14 @@ API.interceptors.response.use(
         localStorage.setItem("accessToken", newAccessToken);
 
         // update axios defaults
-        API.defaults.headers.common[
-          "Authorization"
-        ] = `Bearer ${newAccessToken}`;
+        API.defaults.headers.common["Authorization"] =
+          `Bearer ${newAccessToken}`;
 
         // update original request header
-        originalRequest.headers[
-          "Authorization"
-        ] = `Bearer ${newAccessToken}`;
+        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
 
         // retry request
         return API(originalRequest);
-
       } catch (refreshError) {
         localStorage.clear();
         window.location.href = "/login";
@@ -74,5 +67,5 @@ API.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );

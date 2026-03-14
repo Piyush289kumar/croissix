@@ -55,7 +55,7 @@ export async function GET(req: Request) {
 
     /* ⭐ IMPORTANT: set cookie for Next.js APIs */
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
 
     cookieStore.set(
       "google_tokens",
