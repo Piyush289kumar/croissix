@@ -94,12 +94,50 @@ export async function POST(req: Request) {
 
     /* ---------------- FIX BASE64 IMAGES ---------------- */
 
-    if (payload?.media) {
-      payload.media = payload.media.filter(
-        (m: any) => !m.sourceUrl.startsWith("data:"),
-      );
+    /* ---------------- UPLOAD BASE64 IMAGES ---------------- */
 
-      console.log("Filtered media:", payload.media);
+    if (payload?.media?.length) {
+      console.log("Processing media images...");
+
+      const uploadedMedia = [];
+
+      for (const m of payload.media) {
+        if (m.sourceUrl.startsWith("data:")) {
+          console.log("Uploading AI image to Cloudinary...");
+
+          const uploadRes = await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/upload`,
+            {
+              method: "POST",
+              body: (() => {
+                const form = new FormData();
+
+                const base64 = m.sourceUrl.split(",")[1];
+                const buffer = Buffer.from(base64, "base64");
+
+                const blob = new Blob([buffer], { type: "image/png" });
+
+                form.append("file", blob, "ai-image.png");
+
+                return form;
+              })(),
+            },
+          );
+
+          const uploaded = await uploadRes.json();
+
+          console.log("Uploaded URL:", uploaded.secure_url);
+
+          uploadedMedia.push({
+            mediaFormat: "PHOTO",
+            sourceUrl: uploaded.secure_url,
+          });
+        } else {
+          uploadedMedia.push(m);
+        }
+      }
+
+      payload.media = uploadedMedia;
     }
 
     /* ---------------- FIX EVENT POST ---------------- */
@@ -132,6 +170,19 @@ export async function POST(req: Request) {
 
     payload.topicType = payload.topicType || "STANDARD";
 
+    /* Fix CTA validation */
+
+    if (payload.callToAction) {
+      const action = payload.callToAction.actionType;
+
+      const needsUrl = ["LEARN_MORE", "BOOK", "ORDER", "SHOP", "SIGN_UP"];
+
+      if (needsUrl.includes(action) && !payload.callToAction.url) {
+        delete payload.callToAction;
+      }
+    }
+
+    console.log("FINAL GOOGLE PAYLOAD:", JSON.stringify(payload, null, 2));
     /* ---------------- GOOGLE POST API ---------------- */
 
     const url = `https://mybusiness.googleapis.com/v4/${accountId}/locations/${locationId}/localPosts`;
