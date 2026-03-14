@@ -6,13 +6,10 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   const body = await req.json();
 
-  const {
-    razorpay_payment_id,
-    razorpay_subscription_id,
-    razorpay_signature,
-  } = body;
+  const { razorpay_payment_id, razorpay_subscription_id, razorpay_signature } =
+    body;
 
-  const secret = process.env.RAZORPAY_WEBHOOK_SECRET!;
+  const secret = process.env.RAZORPAY_KEY_SECRET!;
 
   const generatedSignature = crypto
     .createHmac("sha256", secret)
@@ -20,10 +17,7 @@ export async function POST(req: Request) {
     .digest("hex");
 
   if (generatedSignature !== razorpay_signature) {
-    return NextResponse.json(
-      { success: false },
-      { status: 400 }
-    );
+    return NextResponse.json({ success: false }, { status: 400 });
   }
 
   return NextResponse.json({ success: true });

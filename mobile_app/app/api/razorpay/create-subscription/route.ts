@@ -13,28 +13,24 @@ export async function POST(req: Request) {
     const { planId } = await req.json();
 
     if (!planId) {
-      return NextResponse.json(
-        { error: "Plan ID required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Plan ID required" }, { status: 400 });
     }
 
     const subscription = await razorpay.subscriptions.create({
       plan_id: planId,
       total_count: 12,
       customer_notify: 1,
+      start_at: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60,
     });
-
     return NextResponse.json({
       subscriptionId: subscription.id,
     });
-
   } catch (error) {
     console.error("Razorpay create subscription error:", error);
 
     return NextResponse.json(
       { error: "Failed to create subscription" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

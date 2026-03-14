@@ -1,4 +1,5 @@
 // mobile_app\app\(main)\subscription\page.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -196,8 +197,27 @@ function useRazorpay() {
       description: `${opts.planName} Plan Subscription`,
       image: "/logo.png",
       theme: { color: "#2563eb" },
-      handler(response: any) {
-        opts.onSuccess(subscriptionId, response.razorpay_payment_id);
+      handler: async (response: any) => {
+        const verify = await fetch("/api/razorpay/verify-subscription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_subscription_id: response.razorpay_subscription_id,
+            razorpay_signature: response.razorpay_signature,
+          }),
+        });
+
+        const data = await verify.json();
+
+        if (data.success) {
+          opts.onSuccess(
+            response.razorpay_subscription_id,
+            response.razorpay_payment_id,
+          );
+        } else {
+          opts.onFail("Payment verification failed");
+        }
       },
       modal: {
         ondismiss() {
