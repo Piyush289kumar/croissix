@@ -31,6 +31,8 @@
 //   • User explicitly taps "Regenerate Image"
 //   The page tracks a `imageKey` hash to prevent redundant calls.
 //
+
+
 // Deploy to: mobile_app/app/api/ai/generate-image/route.ts
 
 const IMAGE_STYLES: Record<string, string> = {
@@ -56,21 +58,62 @@ const STYLE_MODIFIERS: Record<string, string> = {
 
 function buildImagePrompt(params: {
   title: string;
+  content: string;
   postType: string;
   businessName: string;
   businessCategory: string;
   style: string;
 }): string {
-  const { title, postType, businessName, businessCategory, style } = params;
-  const baseStyle = IMAGE_STYLES[postType] ?? IMAGE_STYLES.STANDARD;
-  const styleMod = STYLE_MODIFIERS[style] ?? STYLE_MODIFIERS.photorealistic;
+  const { title, content, postType, businessName, businessCategory, style } =
+    params;
 
-  // Build a visual description, NOT showing text in the image
-  const category = businessCategory || "business";
   const topic = title.replace(/[^a-zA-Z0-9\s]/g, "").trim();
 
-  //   const prompt = `${topic}, ${category} concept, ${baseStyle}, ${styleMod}, no text, no words, no letters, no watermark, high quality commercial image, 16:9 aspect ratio`;
-  const prompt = `${topic}, ${category}, ${baseStyle}, ${styleMod}, high quality commercial photography`;
+  const contentKeywords = content
+    .replace(/[#*]/g, "")
+    .split(/\s+/)
+    .filter((w) => w.length > 4)
+    .slice(0, 10)
+    .join(" ");
+
+  const category = businessCategory || "local business";
+
+  const styleMod = STYLE_MODIFIERS[style] ?? STYLE_MODIFIERS.photorealistic;
+
+  const sceneMap: Record<string, string> = {
+    STANDARD: `professional marketing photo representing ${category}`,
+    EVENT: `event promotion scene for ${category}, people participating, vibrant atmosphere`,
+    OFFER: `promotional sale concept for ${category}, attractive commercial marketing visual`,
+  };
+
+  const scene = sceneMap[postType] ?? sceneMap.STANDARD;
+
+  const prompt = `
+            brand marketing image for "${businessName}",
+            ${category} business promotion,
+            topic: ${topic},
+            context: ${contentKeywords},
+
+            visual scene:
+            ${scene},
+
+            composition:
+            center focused subject,
+            clean background,
+            modern advertising photography,
+
+            style:
+            ${styleMod},
+
+            format:
+            1200 width x 900 height
+            4:3 aspect ratio marketing image,
+            professional Google Business Profile post image,
+
+            no watermark,
+            no random text,
+            high quality commercial photography
+            `.replace(/\n/g, " ");
 
   return prompt;
 }
@@ -187,6 +230,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const {
       title,
+      content = "",
       postType = "STANDARD",
       businessName = "",
       businessCategory = "",
@@ -194,6 +238,7 @@ export async function POST(req: Request) {
       seed = Math.floor(Math.random() * 999999),
     } = body as {
       title: string;
+      content?: string;
       postType?: string;
       businessName?: string;
       businessCategory?: string;
@@ -210,6 +255,7 @@ export async function POST(req: Request) {
 
     const prompt = buildImagePrompt({
       title,
+      content,
       postType,
       businessName,
       businessCategory,
