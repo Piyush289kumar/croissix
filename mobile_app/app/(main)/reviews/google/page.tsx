@@ -350,7 +350,7 @@ function ReplyComposer({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          review: review.text,
+          review: review.text ?? "",
           rating: review.rating,
           reviewerName: review.author,
           businessName: user?.googleLocationName,
@@ -756,6 +756,7 @@ export default function GoogleReviewsPage() {
   const [sort, setSort] = useState<SortType>("newest");
   const [search, setSearch] = useState("");
   const [showSort, setShowSort] = useState(false);
+  const [autoReplying, setAutoReplying] = useState(false);
 
   const hasMore = page < totalPages;
 
@@ -809,35 +810,85 @@ export default function GoogleReviewsPage() {
 
   /* ── post reply ── */
   const postReply = async (reviewName: string, comment: string) => {
-    const token = localStorage.getItem("accessToken");
     const res = await fetch("/api/google/reply", {
       method: "POST",
+      credentials: "include", // ⭐ sends cookies
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ reviewName, comment }),
+      body: JSON.stringify({
+        reviewName,
+        comment,
+      }),
     });
+
     const json = await res.json();
-    if (!json.success) throw new Error(json.error ?? "Reply failed");
+
+    if (!json.success) {
+      throw new Error(json.error ?? "Reply failed");
+    }
+
     setReviews((prev) =>
       prev.map((r) =>
         r.name === reviewName ? { ...r, replied: true, reply: comment } : r,
       ),
     );
   };
-
   /* ── bulk AI reply ── */
   const bulkAI = async () => {
-    for (const r of reviews.filter((x) => !x.replied)) {
-      try {
-        await postReply(r.name, getAiReply(r));
-      } catch {
-        /* skip */
+    setAutoReplying(true);
+
+    try {
+      const unrepliedReviews = reviews.filter((r) => !r.replied);
+
+      for (const r of unrepliedReviews) {
+        let replyText = "";
+
+        // ⭐ Handle reviews without text
+        if (!r.text || r.text.trim() === "") {
+          replyText = `
+            Hi ${r.author.split(" ")[0]},
+
+            Thank you for taking the time to leave a rating for ${user?.googleLocationName}.
+            We truly appreciate your support and are glad you chose us.
+
+            We look forward to welcoming you again.
+
+            Best Regards,
+            ${user?.googleLocationName} Team
+            `.trim();
+        } else {
+          const aiRes = await fetch("/api/ai/reply", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              review: r.text,
+              rating: r.rating,
+              reviewerName: r.author,
+              businessName: user?.googleLocationName,
+              tone: "Professional",
+            }),
+          });
+
+          const aiJson = await aiRes.json();
+
+          if (!aiJson.success) continue;
+
+          replyText = aiJson.reply;
+        }
+
+        // Send reply to Google
+        await postReply(r.name, replyText);
+
+        // Prevent Google API rate limit
+        await new Promise((resolve) => setTimeout(resolve, 1200));
       }
+    } finally {
+      setAutoReplying(false);
     }
   };
-
   const handleFlag = (id: string) =>
     setReviews((prev) =>
       prev.map((r) => (r.id === id ? { ...r, flagged: !r.flagged } : r)),
@@ -1123,6 +1174,7 @@ export default function GoogleReviewsPage() {
             {unreplied > 0 && (
               <button
                 onClick={bulkAI}
+                disabled={autoReplying}
                 className="w-full h-11 rounded-[13px] flex items-center justify-center gap-2
                   text-[13px] font-bold text-white mb-4 transition-all active:scale-[0.97]"
                 style={{
@@ -1131,7 +1183,10 @@ export default function GoogleReviewsPage() {
                 }}
               >
                 <Sparkles size={14} />
-                Auto-Reply Unreplied ({unreplied}) with AI
+
+                {autoReplying
+                  ? "Generating AI Replies..."
+                  : `Auto-Reply Unreplied (${unreplied}) with AI`}
               </button>
             )}
 

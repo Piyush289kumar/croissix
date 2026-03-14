@@ -1,20 +1,23 @@
 // mobile_app\app\api\auth\callback\route.ts
 
+
 import { google } from "googleapis";
 import axios from "axios";
+import { cookies } from "next/headers";
 
 export async function GET(req: Request) {
+
   const { searchParams } = new URL(req.url);
 
   const code = searchParams.get("code");
-  const state = searchParams.get("state"); // JWT token
+  const state = searchParams.get("state");
+
   const token = state ? decodeURIComponent(state) : "";
 
   if (!code) {
     return new Response("Missing code parameter", { status: 400 });
   }
 
-  // Determine redirect URI dynamically
   const redirectUri =
     process.env.NODE_ENV === "production"
       ? process.env.GOOGLE_REDIRECT_URI
@@ -27,15 +30,14 @@ export async function GET(req: Request) {
   );
 
   try {
-    // Exchange code for tokens
+
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
-    // Get Google profile info
     const oauth2 = google.oauth2({ auth: oauth2Client, version: "v2" });
     const { data: googleProfile } = await oauth2.userinfo.get();
 
-    // Send Google info to backend to link account
+    // Save tokens in your backend
     await axios.post(
       `${process.env.NEXT_PUBLIC_API_URL}/auth/link-google`,
       {
@@ -51,13 +53,32 @@ export async function GET(req: Request) {
       }
     );
 
-    // Redirect back to frontend home or dashboard
+    /* ⭐ IMPORTANT: set cookie for Next.js APIs */
+
+    const cookieStore = cookies();
+
+    cookieStore.set(
+      "google_tokens",
+      JSON.stringify({
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expiry_date: tokens.expiry_date,
+      }),
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+      }
+    );
+
     const frontendUrl =
       process.env.NODE_ENV === "production"
         ? "https://croissix.vercel.app"
         : "http://localhost:3000";
 
     return Response.redirect(frontendUrl);
+
   } catch (error) {
     console.error("Google OAuth callback error:", error);
     return new Response("OAuth callback failed", { status: 500 });
