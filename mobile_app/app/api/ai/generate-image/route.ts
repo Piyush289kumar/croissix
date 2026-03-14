@@ -34,79 +34,143 @@
 // Deploy to: mobile_app/app/api/ai/generate-image/route.ts
 
 const IMAGE_STYLES: Record<string, string> = {
-  STANDARD: "professional product photography, clean bright background, commercial quality, sharp focus, 4K",
-  EVENT:    "vibrant event poster style, dynamic composition, celebratory atmosphere, bold colours, professional photography",
-  OFFER:    "bold promotional banner style, sale concept, eye-catching composition, commercial photography, bright colours",
+  STANDARD:
+    "professional product photography, clean bright background, commercial quality, sharp focus, 4K",
+  EVENT:
+    "vibrant event poster style, dynamic composition, celebratory atmosphere, bold colours, professional photography",
+  OFFER:
+    "bold promotional banner style, sale concept, eye-catching composition, commercial photography, bright colours",
 };
 
 const STYLE_MODIFIERS: Record<string, string> = {
-  photorealistic: "photorealistic, DSLR photography, natural lighting, depth of field",
-  illustration:   "digital illustration, modern flat design, vibrant colours, clean lines",
-  minimalist:     "minimalist photography, white background, product-focused, studio lighting, elegant",
-  cinematic:      "cinematic photography, moody lighting, film quality, dramatic composition",
-  warm:           "warm toned photography, golden hour lighting, cosy atmosphere, lifestyle photography",
+  photorealistic:
+    "photorealistic, DSLR photography, natural lighting, depth of field",
+  illustration:
+    "digital illustration, modern flat design, vibrant colours, clean lines",
+  minimalist:
+    "minimalist photography, white background, product-focused, studio lighting, elegant",
+  cinematic:
+    "cinematic photography, moody lighting, film quality, dramatic composition",
+  warm: "warm toned photography, golden hour lighting, cosy atmosphere, lifestyle photography",
 };
 
 function buildImagePrompt(params: {
-  title:            string;
-  postType:         string;
-  businessName:     string;
+  title: string;
+  postType: string;
+  businessName: string;
   businessCategory: string;
-  style:            string;
+  style: string;
 }): string {
   const { title, postType, businessName, businessCategory, style } = params;
-  const baseStyle  = IMAGE_STYLES[postType] ?? IMAGE_STYLES.STANDARD;
-  const styleMod   = STYLE_MODIFIERS[style]  ?? STYLE_MODIFIERS.photorealistic;
+  const baseStyle = IMAGE_STYLES[postType] ?? IMAGE_STYLES.STANDARD;
+  const styleMod = STYLE_MODIFIERS[style] ?? STYLE_MODIFIERS.photorealistic;
 
   // Build a visual description, NOT showing text in the image
-  const category   = businessCategory || "business";
-  const topic      = title.replace(/[^a-zA-Z0-9\s]/g, "").trim();
+  const category = businessCategory || "business";
+  const topic = title.replace(/[^a-zA-Z0-9\s]/g, "").trim();
 
-  const prompt = `${topic}, ${category} concept, ${baseStyle}, ${styleMod}, no text, no words, no letters, no watermark, high quality commercial image, 16:9 aspect ratio`;
+  //   const prompt = `${topic}, ${category} concept, ${baseStyle}, ${styleMod}, no text, no words, no letters, no watermark, high quality commercial image, 16:9 aspect ratio`;
+  const prompt = `${topic}, ${category}, ${baseStyle}, ${styleMod}, high quality commercial photography`;
 
   return prompt;
 }
 
 /* ── Pollinations AI (free, no key) ──────────────────────────────── */
-async function generateWithPollinations(prompt: string, seed: number): Promise<string> {
-  const encoded  = encodeURIComponent(prompt);
-  const url      = `https://image.pollinations.ai/prompt/${encoded}?width=1200&height=675&model=flux&seed=${seed}&nologo=true&enhance=true`;
+async function generateWithPollinations(
+  prompt: string,
+  seed: number,
+): Promise<string> {
+  console.log("[pollinations] start");
+  console.log("[pollinations] seed:", seed);
 
-  // Pollinations returns the image directly — fetch and convert to base64
-  const res      = await fetch(url, { signal: AbortSignal.timeout(30_000) });
-  if (!res.ok) throw new Error(`Pollinations returned ${res.status}`);
+  const encoded = encodeURIComponent(prompt);
+
+  const url =
+    `https://gen.pollinations.ai/image/${encoded}` +
+    `?model=flux&width=1200&height=675&seed=${seed}&enhance=true`;
+
+  console.log("[pollinations] url:", url.slice(0, 120));
+
+  let res: Response | null = null;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      console.log(`[pollinations] attempt ${attempt}`);
+
+      res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${process.env.POLLINATIONS_API_KEY}`,
+          Accept: "image/*",
+        },
+        signal: AbortSignal.timeout(90000),
+      });
+
+      console.log("[pollinations] status:", res.status);
+
+      if (res.ok) break;
+
+      console.warn("[pollinations] non-200 response");
+    } catch (err) {
+      console.error("[pollinations] fetch error:", err);
+    }
+
+    await new Promise((r) => setTimeout(r, 1200));
+  }
+
+  if (!res || !res.ok) {
+    throw new Error(`Pollinations failed after retries (${res?.status})`);
+  }
 
   const contentType = res.headers.get("content-type") ?? "image/jpeg";
-  if (!contentType.startsWith("image/")) throw new Error("Pollinations did not return an image");
 
-  const buffer   = await res.arrayBuffer();
-  const b64      = Buffer.from(buffer).toString("base64");
+  console.log("[pollinations] content-type:", contentType);
+
+  const buffer = await res.arrayBuffer();
+
+  console.log("[pollinations] image size:", buffer.byteLength);
+
+  const b64 = Buffer.from(buffer).toString("base64");
+
+  console.log("[pollinations] base64 length:", b64.length);
+
   return `data:${contentType};base64,${b64}`;
 }
 
 /* ── Together AI (FLUX.1-schnell, requires key) ──────────────────── */
-async function generateWithTogether(prompt: string, seed: number): Promise<string> {
+async function generateWithTogether(
+  prompt: string,
+  seed: number,
+): Promise<string> {
+  console.log("[together] start");
+  console.log("[together] key exists:", !!process.env.TOGETHER_API_KEY);
+  console.log("[together] seed:", seed);
+  console.log("[together] prompt:", prompt.slice(0, 100));
+
   const key = process.env.TOGETHER_API_KEY;
   if (!key) throw new Error("TOGETHER_API_KEY not set");
 
-  const res  = await fetch("https://api.together.xyz/v1/images/generations", {
-    method:  "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+  const res = await fetch("https://api.together.xyz/v1/images/generations", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
-      model:           "black-forest-labs/FLUX.1-schnell-Free",
+      model: "black-forest-labs/FLUX.1-schnell-Free",
       prompt,
-      width:           1200,
-      height:          675,
-      steps:           4,
+      width: 1200,
+      height: 675,
+      steps: 4,
       seed,
-      n:               1,
+      n: 1,
       response_format: "b64_json",
     }),
     signal: AbortSignal.timeout(45_000),
   });
 
   const json = await res.json();
-  if (!res.ok) throw new Error(json.error?.message ?? `Together API ${res.status}`);
+  if (!res.ok)
+    throw new Error(json.error?.message ?? `Together API ${res.status}`);
 
   const b64 = json.data?.[0]?.b64_json;
   if (!b64) throw new Error("Together API: no image data returned");
@@ -123,25 +187,34 @@ export async function POST(req: Request) {
     const body = await req.json();
     const {
       title,
-      postType         = "STANDARD",
-      businessName     = "",
+      postType = "STANDARD",
+      businessName = "",
       businessCategory = "",
-      style            = "photorealistic",
-      seed             = Math.floor(Math.random() * 999999),
+      style = "photorealistic",
+      seed = Math.floor(Math.random() * 999999),
     } = body as {
-      title:             string;
-      postType?:         string;
-      businessName?:     string;
+      title: string;
+      postType?: string;
+      businessName?: string;
       businessCategory?: string;
-      style?:            string;
-      seed?:             number;
+      style?: string;
+      seed?: number;
     };
 
     if (!title?.trim()) {
-      return Response.json({ success: false, error: "title is required" }, { status: 400 });
+      return Response.json(
+        { success: false, error: "title is required" },
+        { status: 400 },
+      );
     }
 
-    const prompt = buildImagePrompt({ title, postType, businessName, businessCategory, style });
+    const prompt = buildImagePrompt({
+      title,
+      postType,
+      businessName,
+      businessCategory,
+      style,
+    });
     console.log("[generate-image] prompt:", prompt.slice(0, 100));
 
     let imageUrl: string;
@@ -153,7 +226,11 @@ export async function POST(req: Request) {
       provider = "pollinations";
       console.log("[generate-image] pollinations OK");
     } catch (polErr: any) {
-      console.warn("[generate-image] pollinations failed:", polErr.message, "— trying Together AI");
+      console.warn(
+        "[generate-image] pollinations failed:",
+        polErr.message,
+        "— trying Together AI",
+      );
       // Fallback to Together AI
       try {
         imageUrl = await generateWithTogether(prompt, seed);
@@ -161,23 +238,28 @@ export async function POST(req: Request) {
         console.log("[generate-image] together OK");
       } catch (toErr: any) {
         console.error("[generate-image] both providers failed:", toErr.message);
-        return Response.json({
-          success: false,
-          error: `Image generation failed: ${toErr.message}. Add TOGETHER_API_KEY to .env for reliable generation.`,
-        }, { status: 500 });
+        return Response.json(
+          {
+            success: false,
+            error: `Image generation failed: ${toErr.message}. Add TOGETHER_API_KEY to .env for reliable generation.`,
+          },
+          { status: 500 },
+        );
       }
     }
 
     return Response.json({
-      success:  true,
+      success: true,
       imageUrl,
       prompt,
       provider,
       seed,
     });
-
   } catch (err: any) {
     console.error("[generate-image] error:", err);
-    return Response.json({ success: false, error: err.message ?? "Image generation failed" }, { status: 500 });
+    return Response.json(
+      { success: false, error: err.message ?? "Image generation failed" },
+      { status: 500 },
+    );
   }
 }
