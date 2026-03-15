@@ -93,7 +93,6 @@ interface Competitor {
   reviews: number;
   position: number;
 }
-
 /* ═══════════════════════════════════════════════════════════════
    FRAMER MOTION VARIANTS
 ═══════════════════════════════════════════════════════════════ */
