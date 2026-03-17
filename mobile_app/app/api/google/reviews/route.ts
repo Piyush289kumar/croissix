@@ -1,18 +1,15 @@
 // mobile_app\app\api\google\reviews\route.ts
 
-
 import { google } from "googleapis";
 import axios from "axios";
 
 export async function GET(req: Request) {
-
   try {
-
     const { searchParams } = new URL(req.url);
 
     const locationName = searchParams.get("location");
     const page = Number(searchParams.get("page") || 1);
-    const limit = 5;
+    const limit = 50;
 
     const token = req.headers.get("authorization");
 
@@ -23,7 +20,7 @@ export async function GET(req: Request) {
     if (!locationName) {
       return Response.json(
         { success: false, error: "Location is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -31,7 +28,7 @@ export async function GET(req: Request) {
 
     const profile = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}/users/profile/view`,
-      { headers: { Authorization: token } }
+      { headers: { Authorization: token } },
     );
 
     const user = profile.data.user;
@@ -39,7 +36,7 @@ export async function GET(req: Request) {
     if (!user.googleAccessToken) {
       return Response.json(
         { success: false, error: "Google not connected" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -47,7 +44,7 @@ export async function GET(req: Request) {
 
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET
+      process.env.GOOGLE_CLIENT_SECRET,
     );
 
     oauth2Client.setCredentials({
@@ -69,63 +66,42 @@ export async function GET(req: Request) {
     if (!accountId) {
       return Response.json(
         { success: false, error: "No Google Business account found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     const locationId = locationName.split("/").pop();
 
     /* ---------------- FETCH ALL REVIEWS ---------------- */
+    const pageToken = searchParams.get("pageToken"); // ✅ get from frontend
 
-    let allReviews: any[] = [];
-    let nextPageToken: string | undefined = undefined;
+    const url = new URL(
+      `https://mybusiness.googleapis.com/v4/${accountId}/locations/${locationId}/reviews`,
+    );
 
-    do {
+    url.searchParams.append("pageSize", "50");
 
-      const url = new URL(
-        `https://mybusiness.googleapis.com/v4/${accountId}/locations/${locationId}/reviews`
-      );
+    // ✅ THIS IS THE KEY FIX
+    if (pageToken) {
+      url.searchParams.append("pageToken", pageToken);
+    }
 
-      url.searchParams.append("pageSize", "50");
+    const res = await fetch(url.toString(), {
+      headers: await oauth2Client.getRequestHeaders(),
+    });
 
-      if (nextPageToken) {
-        url.searchParams.append("pageToken", nextPageToken);
-      }
+    const data = await res.json();
 
-      const res = await fetch(url.toString(), {
-        headers: await oauth2Client.getRequestHeaders(),
-      });
-
-      const data = await res.json();
-
-      if (data.reviews) {
-        allReviews.push(...data.reviews);
-      }
-
-      nextPageToken = data.nextPageToken;
-
-    } while (nextPageToken);
-
-    console.log("TOTAL GOOGLE REVIEWS:", allReviews.length);
-
-    /* ---------------- UI PAGINATION ---------------- */
-
-    const start = (page - 1) * limit;
-    const end = start + limit;
-
-    const paginated = allReviews.slice(start, end);
+    console.log("FETCHED REVIEWS:", data.reviews?.length);
 
     return Response.json({
       success: true,
-      total: allReviews.length,
-      page,
-      limit,
-      totalPages: Math.ceil(allReviews.length / limit),
-      reviews: paginated,
+      reviews: data.reviews || [],
+      nextPageToken: data.nextPageToken || null, // ✅ IMPORTANT
+      totalReviewCount: data.totalReviewCount || 0,
+      averageRating: data.averageRating || 0,
     });
-
   } catch (error: any) {
-
     console.error("GOOGLE REVIEWS ERROR:", error);
 
     return Response.json(
@@ -133,8 +109,7 @@ export async function GET(req: Request) {
         success: false,
         error: error.message || "Failed to fetch reviews",
       },
-      { status: 500 }
+      { status: 500 },
     );
-
   }
 }
