@@ -2260,7 +2260,7 @@ export default function HomePage() {
                   isDark={isDark}
                   action={{
                     label: "See all",
-                    onClick: () => router.push("/dashboard/competitors"),
+                    onClick: () => router.push("/"),
                   }}
                 />
                 <motion.div
