@@ -152,18 +152,29 @@ export const login = async (req, res) => {
 // Link Google Account
 export const linkGoogleAccount = async (req, res) => {
   try {
-    const userId = req.user.id;
+    console.log("🔵 LINK GOOGLE BODY:", req.body);
+    console.log("🔵 AUTH USER:", req.user);
 
-    const {
-      googleId,
-      googleAccessToken,
-      googleRefreshToken,
-      googleTokenExpiry,
-    } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "Unauthorized: Missing user",
+      });
+    }
+
+    let { googleId, googleAccessToken, googleRefreshToken, googleTokenExpiry } =
+      req.body;
+
+    // ✅ FIX 1: fallback for Google "sub"
+    if (!googleId && req.body.sub) {
+      googleId = req.body.sub;
+    }
 
     if (!googleId) {
       return res.status(400).json({
         message: "Google ID is required",
+        received: req.body,
       });
     }
 
@@ -175,7 +186,7 @@ export const linkGoogleAccount = async (req, res) => {
       });
     }
 
-    // prevent linking multiple accounts
+    // ✅ prevent linking multiple accounts
     const existingGoogleUser = await User.findOne({ googleId });
 
     if (existingGoogleUser && existingGoogleUser._id.toString() !== userId) {
@@ -184,10 +195,12 @@ export const linkGoogleAccount = async (req, res) => {
       });
     }
 
+    // ✅ FIX 2: safe updates (don't overwrite with undefined)
     user.googleId = googleId;
-    user.googleAccessToken = googleAccessToken;
-    user.googleRefreshToken = googleRefreshToken;
-    user.googleTokenExpiry = googleTokenExpiry;
+    user.googleAccessToken = googleAccessToken || user.googleAccessToken;
+    user.googleRefreshToken = googleRefreshToken || user.googleRefreshToken; // ⭐ important
+    user.googleTokenExpiry = googleTokenExpiry || user.googleTokenExpiry;
+
     user.provider = "google";
 
     await user.save();
@@ -197,10 +210,11 @@ export const linkGoogleAccount = async (req, res) => {
       user,
     });
   } catch (error) {
-    console.error("Google link error:", error);
+    console.error("❌ Google link error:", error);
 
     return res.status(500).json({
       message: "Internal server error",
+      error: error.message,
     });
   }
 };
