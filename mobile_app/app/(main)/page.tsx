@@ -2439,6 +2439,19 @@ export default function HomePage() {
               />
               <InstagramComingSoonCard isDark={isDark} />
             </motion.div>
+
+            <div style={{ textAlign: "center", padding: "10px 0 100px" }}>
+              <div
+                className={`text-[12px] text-center leading-relaxed text-slate-700`}
+              >
+                Croissix · Beta Version 0.01
+              </div>
+              <div
+                className={`text-[12px] text-center leading-relaxed text-slate-700`}
+              >
+                from Vipprow
+              </div>
+            </div>
           </motion.div>
         )}
       </div>
