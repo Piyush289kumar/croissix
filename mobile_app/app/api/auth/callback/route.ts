@@ -1,12 +1,10 @@
 // mobile_app\app\api\auth\callback\route.ts
 
-
 import { google } from "googleapis";
 import axios from "axios";
 import { cookies } from "next/headers";
 
 export async function GET(req: Request) {
-
   const { searchParams } = new URL(req.url);
 
   const code = searchParams.get("code");
@@ -26,11 +24,10 @@ export async function GET(req: Request) {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    redirectUri
+    redirectUri,
   );
 
   try {
-
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
@@ -50,7 +47,7 @@ export async function GET(req: Request) {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     /* ⭐ IMPORTANT: set cookie for Next.js APIs */
@@ -69,16 +66,14 @@ export async function GET(req: Request) {
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
-      }
+      },
     );
 
     const frontendUrl =
-      process.env.NODE_ENV === "production"
-        ? "https://croissix.vercel.app"
-        : "http://localhost:3000";
+      process.env.GOOGLE_REDIRECT_URI ||
+      "http://localhost:3000/api/auth/callback";
 
     return Response.redirect(frontendUrl);
-
   } catch (error) {
     console.error("Google OAuth callback error:", error);
     return new Response("OAuth callback failed", { status: 500 });
