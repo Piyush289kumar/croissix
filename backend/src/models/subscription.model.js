@@ -13,12 +13,18 @@ const subscriptionSchema = new mongoose.Schema(
     razorpaySubscriptionId: {
       type: String,
       required: true,
-      unique: true,
+      unique: true, // prevents duplicate records
     },
 
-    razorpayPaymentId: String,
+    razorpayPaymentId: {
+      type: String,
+      default: null,
+    },
 
-    planId: String,
+    planId: {
+      type: String,
+      default: "starter",
+    },
 
     status: {
       type: String,
@@ -29,17 +35,25 @@ const subscriptionSchema = new mongoose.Schema(
     currentStart: Date,
     currentEnd: Date,
 
-    totalCount: Number,
-    paidCount: Number,
+    totalCount: { type: Number, default: 12 },
+    paidCount: { type: Number, default: 0 },
 
-    amount: Number,
-
-    currency: {
-      type: String,
-      default: "INR",
-    },
+    amount: { type: Number, default: 499 },
+    currency: { type: String, default: "INR" },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  },
 );
+
+/* ─────────────────────────────────────────────
+   INDEXES  —  critical for 1k+ users
+   1. user + status  →  fast "do I have active sub?" queries
+   2. currentEnd     →  fast expiry sweep / cron jobs
+   3. razorpaySubscriptionId  →  already unique, also indexed
+───────────────────────────────────────────── */
+subscriptionSchema.index({ user: 1, status: 1 });
+subscriptionSchema.index({ currentEnd: 1 });
+subscriptionSchema.index({ createdAt: -1 });
 
 export default mongoose.model("Subscription", subscriptionSchema);

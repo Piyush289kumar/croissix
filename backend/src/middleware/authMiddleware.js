@@ -21,7 +21,7 @@ export const ensureAuth = async (req, res, next) => {
 
     // 🔥 Include subscription fields
     const user = await User.findById(decoded.id)
-      .select("-password subscription subscriptionStatus plan expiresAt role")
+      .select("-password")
       .lean();
 
     if (!user) {

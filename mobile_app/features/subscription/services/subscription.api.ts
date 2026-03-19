@@ -1,12 +1,15 @@
 // mobile_app\features\subscription\services\subscription.api.ts
 
 import { API } from "@/lib/axiosClient";
+import { getAuthHeader } from "@/lib/token";
 
 /* =========================================
    GET MY SUBSCRIPTION
 ========================================= */
 export const fetchMySubscription = async () => {
-  const res = await API.get("/subscription/me");
+  const res = await API.get("/subscription/me", {
+    headers: { Authorization: getAuthHeader() },
+  });
   return res.data;
 };
 
@@ -14,7 +17,13 @@ export const fetchMySubscription = async () => {
    CREATE SUBSCRIPTION
 ========================================= */
 export const createSubscriptionApi = async (planId: string) => {
-  const res = await API.post("/subscription/create", { planId });
+  const res = await API.post(
+    "/subscription/create",
+    { planId },
+    {
+      headers: { Authorization: getAuthHeader() },
+    },
+  );
   return res.data;
 };
 
@@ -27,7 +36,9 @@ export const verifySubscriptionApi = async (payload: {
   razorpay_signature: string;
   planId: string;
 }) => {
-  const res = await API.post("/subscription/verify", payload);
+  const res = await API.post("/subscription/verify", payload, {
+    headers: { Authorization: getAuthHeader() },
+  });
   return res.data;
 };
 
@@ -35,6 +46,12 @@ export const verifySubscriptionApi = async (payload: {
    CANCEL SUBSCRIPTION
 ========================================= */
 export const cancelSubscriptionApi = async (subscriptionId: string) => {
-  const res = await API.post(`/subscription/cancel/${subscriptionId}`);
+  const res = await API.post(
+    `/subscription/cancel/${subscriptionId}`,
+    {},
+    {
+      headers: { Authorization: getAuthHeader() },
+    },
+  );
   return res.data;
 };
