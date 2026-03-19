@@ -36,7 +36,7 @@ type Screen = "plans" | "processing" | "success" | "failed";
 const PLAN = {
   id: "starter",
   name: "Starter",
-  razorpayPlanId: "plan_SR7GH5Kj45UJsP",
+  razorpayPlanId: `${process.env.RAZORPAY_PLAN_ID}`,
   priceMonthly: 49900, // ₹499 in paise
   description: "1 Google Business location, 4 posts/day, 30-day analytics",
   features: [
