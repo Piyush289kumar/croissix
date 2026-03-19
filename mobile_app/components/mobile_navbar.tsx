@@ -204,8 +204,24 @@ export const MobileNavbar = () => {
                   transition: "color .3s",
                 }}
               >
-                AI-Powered
+                AI-Powered   <span
+                style={{
+                  fontFamily:
+                    "-apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--font-sans)",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: titleColor,
+                  lineHeight: 1,
+                  opacity: 0.9,
+                  transition: "color .3s",
+                }}
+              >
+                - [Beta]
               </span>
+              </span>
+             
             </span>
           </NextLink>
 

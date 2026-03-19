@@ -1128,7 +1128,7 @@ export default function ProfilePage() {
               t={t}
               onClick={() => router.push("/privacy")}
             />
-             <Row
+            <Row
               icon={Icon.privacy}
               iconBg="#8b5cf6"
               label="Terms & Conditions"
@@ -1194,24 +1194,14 @@ export default function ProfilePage() {
             />
           </Section>
 
-          <div style={{ textAlign: "center", padding: "10px 0 4px" }}>
+          <div style={{ textAlign: "center", padding: "10px 0 100px" }}>
             <div
-              style={{
-                fontSize: 12,
-                color: t.sub,
-                fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-              }}
+              className={`text-[12px] text-center leading-relaxed text-slate-700`}
             >
-              Croissix · Version 0.01
+              Croissix · Beta Version 0.01
             </div>
             <div
-              style={{
-                fontSize: 11,
-                color: t.sub,
-                marginTop: 1,
-                opacity: 0.5,
-                fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-              }}
+              className={`text-[12px] text-center leading-relaxed text-slate-700`}
             >
               from Vipprow
             </div>
