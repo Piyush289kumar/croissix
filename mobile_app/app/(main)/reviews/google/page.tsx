@@ -45,6 +45,7 @@ import {
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { getAuthHeader } from "@/lib/token";
 
 /* ══════════════════════════════════════════════════════════
    TYPES
@@ -1453,10 +1454,18 @@ export default function GoogleReviewsPage() {
   };
 
   const postReply = async (reviewName: string, comment: string) => {
+    const authHeader = getAuthHeader();
+
+    if (!authHeader) {
+      throw new Error("User not authenticated");
+    }
     const res = await fetch("/api/google/reply", {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: authHeader, // ✅ clean + reusable
+      },
       body: JSON.stringify({ reviewName, comment }),
     });
     const json = await res.json();
