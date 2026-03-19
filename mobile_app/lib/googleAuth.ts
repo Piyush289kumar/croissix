@@ -1,57 +1,55 @@
 // mobile_app\lib\googleAuth.ts
 
 import { google } from "googleapis";
-import { cookies } from "next/headers";
+import axios from "axios";
 
-export async function getAuthClient() {
-  console.log("===== GOOGLE AUTH START =====");
+export async function getAuthClient(authHeader?: string) {
+  console.log("===== GOOGLE AUTH (DB MODE) =====");
 
-  const cookieStore = await cookies();
-
-  const tokenCookie = cookieStore.get("google_tokens");
-
-  console.log("Cookie Found:", !!tokenCookie);
-
-  if (!tokenCookie) {
-    console.log("❌ No google_tokens cookie");
+  if (!authHeader) {
+    console.log("❌ No Authorization header");
     return null;
   }
 
-  const tokens = JSON.parse(tokenCookie.value);
+  try {
+    // ✅ STEP 1: Get user from backend
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/users/profile/view`,
+      {
+        headers: { Authorization: authHeader },
+      },
+    );
 
-  console.log("Tokens:", tokens);
+    const user = res.data.user;
 
-  const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-  );
+    if (!user?.googleRefreshToken) {
+      console.log("❌ No Google refresh token in DB");
+      return null;
+    }
 
-  oauth2Client.setCredentials(tokens);
+    console.log("✅ User found:", user.email);
 
-  console.log("OAuth client credentials set");
+    // ✅ STEP 2: Create OAuth client
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+    );
 
-  // Check expiration
-  if (tokens.expiry_date) {
-    console.log("Token Expiry:", new Date(tokens.expiry_date));
-    console.log("Current Time:", new Date());
-  }
-
-  // Refresh if expired
-  if (tokens.expiry_date && tokens.expiry_date <= Date.now()) {
-    console.log("⚠️ Token expired — refreshing");
-
-    const { credentials } = await oauth2Client.refreshAccessToken();
-
-    console.log("New Credentials:", credentials);
-
-    cookieStore.set("google_tokens", JSON.stringify(credentials), {
-      httpOnly: true,
+    oauth2Client.setCredentials({
+      refresh_token: user.googleRefreshToken,
     });
 
-    oauth2Client.setCredentials(credentials);
+    // ✅ STEP 3: Force fresh access token
+    const { token } = await oauth2Client.getAccessToken();
+
+    console.log("✅ Access token generated");
+
+    return oauth2Client;
+  } catch (error: any) {
+    console.error(
+      "❌ Google Auth Error:",
+      error?.response?.data || error.message,
+    );
+    return null;
   }
-
-  console.log("✅ Auth client ready");
-
-  return oauth2Client;
 }

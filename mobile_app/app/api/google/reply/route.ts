@@ -10,45 +10,50 @@ export async function POST(req: Request) {
     if (!reviewName || !comment) {
       return Response.json(
         { success: false, error: "reviewName and comment are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const auth = await getAuthClient();
-    if (!auth) {
+    // ✅ STEP 1: Get Authorization header
+    const authHeader = req.headers.get("authorization");
+
+    if (!authHeader) {
+      return Response.json(
+        { success: false, error: "Missing Authorization header" },
+        { status: 401 },
+      );
+    }
+
+    // ✅ STEP 2: Get Google client (DB-based)
+    const client = await getAuthClient(authHeader);
+
+    if (!client) {
       return Response.json(
         { success: false, error: "Google authentication failed" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    const url = `https://mybusiness.googleapis.com/v4/${reviewName}/reply`;
-
-    const res = await fetch(url, {
+    // ✅ STEP 3: Use Google client (AUTO refresh handled)
+    const response = await client.request({
+      url: `https://mybusiness.googleapis.com/v4/${reviewName}/reply`,
       method: "PUT",
-      headers: {
-        Authorization: `Bearer ${auth.credentials.access_token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ comment }),
+      data: { comment },
     });
-
-    const data = await res.json();
 
     return Response.json({
       success: true,
-      data,
+      data: response.data,
     });
-
   } catch (error: any) {
-    console.error("Reply Error:", error);
+    console.error("❌ Reply Error:", error?.response?.data || error.message);
 
     return Response.json(
       {
         success: false,
-        error: error.message || "Failed to reply to review",
+        error: error?.response?.data || error.message || "Failed to reply",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -197,6 +197,11 @@ export const linkGoogleAccount = async (req, res) => {
 
     // ✅ FIX 2: safe updates (don't overwrite with undefined)
     user.googleId = googleId;
+
+    // ✅ ADD THESE (IMPORTANT)
+    user.googleAccountEmail = req.body.email || user.googleAccountEmail;
+    user.googleAccountName = req.body.name || user.googleAccountName;
+
     user.googleAccessToken = googleAccessToken || user.googleAccessToken;
     user.googleRefreshToken = googleRefreshToken || user.googleRefreshToken; // ⭐ important
     user.googleTokenExpiry = googleTokenExpiry || user.googleTokenExpiry;

@@ -33,13 +33,21 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
     },
+    googleAccountEmail: {
+      type: String, // ✅ store google email separately
+    },
+    googleAccountName: {
+      type: String,
+    },
     googleAccessToken: {
       type: String,
     },
     googleRefreshToken: {
       type: String,
     },
-    googleTokenExpiry: Date,
+    googleTokenExpiry: {
+      type: Number, // ✅ store as timestamp (matches Google)
+    },
 
     googleLocationId: {
       type: String,
