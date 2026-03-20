@@ -129,7 +129,8 @@ export function DesktopTopbar() {
         </button>
 
         {/* Ask AI */}
-        <button
+        <a
+        href="/ai"
           className="flex items-center gap-2 h-9 px-4 rounded-xl text-white text-[13px] font-semibold transition-all duration-150 active:scale-[0.97]"
           style={{
             background: isDark
@@ -145,7 +146,7 @@ export function DesktopTopbar() {
         >
           <AISparkle />
           Ask AI
-        </button>
+        </a>
       </div>
     </header>
   );

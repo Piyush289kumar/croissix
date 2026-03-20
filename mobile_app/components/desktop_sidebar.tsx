@@ -355,7 +355,8 @@ export function DesktopSidebar() {
       {/* ── Ask AI button ── */}
       <div className="px-3 pb-5 pt-3">
         <div className="h-px mb-3 mx-1" style={{ background: borderColor }} />
-        <button
+        <a
+        href="/ai"
           className="w-full flex items-center justify-center gap-2 h-10 rounded-[12px] text-white text-[13px] font-semibold transition-all duration-150 active:scale-[0.97]"
           style={{
             background: isDark
@@ -371,7 +372,7 @@ export function DesktopSidebar() {
         >
           <AISparkle />
           Ask AI
-        </button>
+        </a>
       </div>
     </aside>
   );
