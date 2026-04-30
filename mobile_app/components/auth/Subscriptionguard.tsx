@@ -7,8 +7,18 @@ import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
 import {
-  Zap, Shield, Check, RefreshCw, CheckCircle2,
-  XCircle, Clock, Bell, Lock, AlertCircle, Tag, X,
+  Zap,
+  Shield,
+  Check,
+  RefreshCw,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Bell,
+  Lock,
+  AlertCircle,
+  Tag,
+  X,
 } from "lucide-react";
 import { getToken } from "@/lib/token";
 import { useSubscription } from "@/features/subscription/hook/useSubscription";
@@ -28,10 +38,10 @@ const PLAN_IDS = {
   croissix_payment: "plan_SjC7KUi6bOWHDW",
 };
 
-// const RZP_KEY =
-//   process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "rzp_live_placeholder";
 const RZP_KEY =
-  process.env.NEXT_PUBLIC_RAZORPAY_TEST_KEY_ID ?? "rzp_live_placeholder";
+  process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "rzp_live_placeholder";
+// const RZP_KEY =
+//   process.env.NEXT_PUBLIC_RAZORPAY_TEST_KEY_ID ?? "rzp_live_placeholder";
 // console.log("key id: ", RZP_KEY);
 
 /* ══════════════════════════════════════════════════
@@ -59,9 +69,9 @@ const PLAN = {
   name: "Croissix",
   // planId: PLAN_IDS.croissix_payment,
   // planId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_TEST,
-  planId: process.env.NEXT_PUBLIC_RAZORPAY_TEST_PLAN_ID,
-  // price: 599,
-  price: 1,
+  planId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_CROISSIX,
+  price: 599,
+  // price: 1,
   color: "#f59e0b",
   gradient: "linear-gradient(135deg,#d97706,#f59e0b)",
   features: [
@@ -1109,7 +1119,11 @@ function SubscriptionGate({ dark }: { dark: boolean }) {
 /* ══════════════════════════════════════════════════
    GUARD
 ══════════════════════════════════════════════════ */
-export default function SubscriptionGuard({ children }: { children: React.ReactNode }) {
+export default function SubscriptionGuard({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const { resolvedTheme } = useTheme();

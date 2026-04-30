@@ -5,14 +5,14 @@ import crypto from "crypto";
 import Subscription from "../models/subscription.model.js";
 import User from "../models/user.model.js";
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_TEST_KEY_ID,
-  key_secret: process.env.RAZORPAY_TEST_KEY_SECRET,
-});
 // const razorpay = new Razorpay({
-//   key_id: process.env.RAZORPAY_KEY_ID,
-//   key_secret: process.env.RAZORPAY_KEY_SECRET,
+//   key_id: process.env.RAZORPAY_TEST_KEY_ID,
+//   key_secret: process.env.RAZORPAY_TEST_KEY_SECRET,
 // });
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 /* ─────────────────────────────────────────────
    CREATE SUBSCRIPTION
@@ -66,8 +66,8 @@ export const createSubscription = async (req, res) => {
       status: "created",
       totalCount: 12,
       paidCount: 0,
-      // amount: 499,
-      amount: 1,
+      amount: 599,
+      // amount: 1,
     });
 
     return res.json({
@@ -127,14 +127,14 @@ export const verifySubscription = async (req, res) => {
     }
 
     // ── Signature verification ───────────────────────────────
-    const generated = crypto
-      .createHmac("sha256", process.env.RAZORPAY_TEST_KEY_SECRET)
-      .update(`${razorpay_payment_id}|${razorpay_subscription_id}`)
-      .digest("hex");
     // const generated = crypto
-    //   .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    //   .createHmac("sha256", process.env.RAZORPAY_TEST_KEY_SECRET)
     //   .update(`${razorpay_payment_id}|${razorpay_subscription_id}`)
     //   .digest("hex");
+    const generated = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_payment_id}|${razorpay_subscription_id}`)
+      .digest("hex");
 
     if (
       !crypto.timingSafeEqual(
@@ -188,8 +188,8 @@ export const verifySubscription = async (req, res) => {
         currentEnd,
         paidCount: 1,
         totalCount: rzSub?.total_count ?? 12,
-        // amount: 499,
-        amount: 1,
+        amount: 599,
+        // amount: 1,
       },
       { upsert: true, new: true },
     );

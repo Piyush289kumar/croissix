@@ -53,14 +53,14 @@ import { useSubscription } from "@/features/subscription/hook/useSubscription";
 
 const PLAN = {
   name: "Croissix",
-  planId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_STARTER,
+  planId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_CROISSIX,
   price: 599,
   color: "#f59e0b",
   gradient: "linear-gradient(135deg,#d97706,#f59e0b)",
   features: [
     { text: "1 Google Business Profile", bold: true },
     { text: "Analytics Dashboard", bold: true },
-    { text: "AI auto-review replies", bold: false },
+    { text: "AI auto-review replies", bold: true },
     { text: "Review monitoring", bold: true },
     { text: "AI insights", bold: true },
     { text: "Google Photos Management", bold: true },
@@ -1603,8 +1603,8 @@ export default function SubscriptionPage() {
     }
 
     const rzp = new window.Razorpay({
-      // key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      key: process.env.NEXT_PUBLIC_RAZORPAY_TEST_KEY_ID,
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      // key: process.env.NEXT_PUBLIC_RAZORPAY_TEST_KEY_ID,
       subscription_id: rzSubId,
       name: "Vipprow",
       description: `Agency Plan`,
