@@ -6,7 +6,7 @@ import Subscription from "../models/subscription.model.js";
 import User from "../models/user.model.js";
 
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
+  key_id: "rzp_live_SR7B4iURq2B13H",
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
