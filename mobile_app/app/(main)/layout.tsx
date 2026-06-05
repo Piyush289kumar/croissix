@@ -14,7 +14,7 @@ import SubscriptionGuard from "@/components/auth/Subscriptionguard";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SubscriptionGuard>
+    // <SubscriptionGuard>
       <div className="relative flex min-h-screen">
         {/* Desktop sidebar — fixed left, hidden on mobile */}
         <DesktopSidebar />
@@ -43,6 +43,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {/* Mobile bottom tab bar — hidden on desktop */}
         <Footer />
       </div>
-    </SubscriptionGuard>
+    // </SubscriptionGuard>
   );
 }
